@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TrendingUp, BarChart3, LineChart, Zap, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,10 +8,17 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  // Start with sidebar open on desktop, closed on mobile
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -37,10 +44,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Grid Background */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] opacity-30 pointer-events-none"></div>
       
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
         className={`${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        } ${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 transition-all duration-300 flex flex-col fixed h-full z-40 relative`}
+        } bg-gray-900/95 backdrop-blur-sm border-r border-gray-800 transition-all duration-300 flex flex-col fixed h-full z-50 relative`}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-900 to-black opacity-80"></div>
         <div className="relative z-10 p-6 border-b border-gray-800 flex items-center justify-between">
@@ -125,10 +143,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </aside>
 
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-lg p-2 text-gray-400 hover:text-white transition-colors"
+        aria-label="Toggle menu"
+      >
+        {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+
       <main
         className={`relative z-10 flex-1 ${
-          sidebarOpen ? 'ml-64' : 'ml-20'
-        } transition-all duration-300 p-8`}
+          sidebarOpen ? 'md:ml-64' : 'md:ml-20'
+        } transition-all duration-300 p-4 sm:p-6 md:p-8`}
       >
         {children}
       </main>

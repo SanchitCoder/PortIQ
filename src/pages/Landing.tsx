@@ -98,17 +98,17 @@ export function Landing() {
         }}
       ></div>
       <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-sm border-b border-gray-800 z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 group cursor-pointer">
             <div className="relative">
-              <TrendingUp className="w-8 h-8 text-gray-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-gray-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
               <div className="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
+            <span className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
               PortIQ
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <a href="#features" className="text-gray-400 hover:text-white transition-all duration-300 relative group">
               Features
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
@@ -121,18 +121,26 @@ export function Landing() {
               Login
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
             </Link>
-            <Link to="/signup" className="bg-white text-black px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 relative overflow-hidden group">
+            <Link to="/signup" className="bg-white text-black px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 relative overflow-hidden group text-sm sm:text-base">
               <span className="relative z-10">Get Started</span>
               <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+            </Link>
+          </div>
+          <div className="flex md:hidden items-center gap-2">
+            <Link to="/login" className="text-gray-400 hover:text-white transition-colors text-sm px-3 py-1.5">
+              Login
+            </Link>
+            <Link to="/signup" className="bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 text-sm">
+              Get Started
             </Link>
           </div>
         </div>
       </nav>
 
-      <section ref={heroRef} className="pt-32 pb-20 px-6 relative">
+      <section ref={heroRef} className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 relative">
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="relative inline-block mb-6">
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight relative">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 tracking-tight relative">
               <span className="relative z-10 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent animate-gradient">
                 Intelligence for
               </span>
@@ -143,13 +151,13 @@ export function Landing() {
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-pink-500/20 blur-3xl animate-pulse"></div>
             </h1>
           </div>
-          <p className="text-xl text-gray-400 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up">
+          <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up px-4">
             AI-powered portfolio monitoring, stock analysis, and investment evaluation to help you make smarter decisions in real-time. Transform your investment strategy with cutting-edge analytics.
           </p>
-          <div className="flex gap-4 justify-center mb-12 animate-fade-in-up animation-delay-500">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 animate-fade-in-up animation-delay-500 px-4">
             <Link 
               to="/signup" 
-              className="group bg-white text-black px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 relative overflow-hidden hover:scale-105 hover:shadow-2xl hover:shadow-white/20"
+              className="group bg-white text-black px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden hover:scale-105 hover:shadow-2xl hover:shadow-white/20 w-full sm:w-auto"
               style={{
                 transform: `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1)`,
                 transformStyle: 'preserve-3d',
@@ -163,13 +171,13 @@ export function Landing() {
             >
               <span className="relative z-10 flex items-center gap-2">
                 Get Started Free
-                <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
             </Link>
             <Link 
               to="/login" 
-              className="bg-transparent border-2 border-gray-700 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-500 transition-all duration-300 relative overflow-hidden group hover:scale-105"
+              className="bg-transparent border-2 border-gray-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:border-gray-500 transition-all duration-300 relative overflow-hidden group hover:scale-105 w-full sm:w-auto"
               style={{
                 transform: `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1)`,
                 transformStyle: 'preserve-3d',
@@ -187,7 +195,7 @@ export function Landing() {
           </div>
           
           {/* Stats */}
-          <div className="grid md:grid-cols-4 gap-6 max-w-4xl mx-auto mt-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto mt-8 sm:mt-16 px-4">
             {[
               { value: '10K+', label: 'Active Users', delay: '0ms' },
               { value: '50K+', label: 'Analyses Performed', delay: '200ms' },
@@ -196,15 +204,15 @@ export function Landing() {
             ].map((stat, index) => (
               <div
                 key={index}
-                className="bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-xl p-6 relative overflow-hidden group hover:border-gray-700 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up"
+                className="bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-xl p-4 sm:p-6 relative overflow-hidden group hover:border-gray-700 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up"
                 style={{ animationDelay: stat.delay }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative z-10">
-                  <div className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                  <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                     {stat.value}
                   </div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                  <div className="text-gray-400 text-xs sm:text-sm">{stat.label}</div>
                 </div>
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full blur-2xl transform group-hover:scale-150 transition-transform duration-500"></div>
               </div>
@@ -213,16 +221,16 @@ export function Landing() {
         </div>
       </section>
 
-      <section id="features" className="py-20 px-6 border-t border-gray-900">
+      <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Powerful Features for Smart Investing</h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Powerful Features for Smart Investing</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-4">
               Everything you need to make informed investment decisions, all in one platform
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="group bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
+            <div className="group bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
               style={{
                 transformStyle: 'preserve-3d',
                 perspective: '1000px',
@@ -230,12 +238,12 @@ export function Landing() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-              <div className="relative z-10 w-14 h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                <BarChart3 className="w-7 h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
+              <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-4 sm:mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 relative z-10">Portfolio Monitor</h3>
-              <p className="text-gray-400 leading-relaxed mb-4 relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 relative z-10">Portfolio Monitor</h3>
+              <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-3 sm:mb-4 relative z-10">
                 Track multiple stocks simultaneously with AI-driven insights on risk, diversification, and performance. Get real-time portfolio health assessments.
               </p>
               <ul className="space-y-2 text-sm text-gray-500 relative z-10">
@@ -254,7 +262,7 @@ export function Landing() {
               </ul>
             </div>
 
-            <div className="group bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
+            <div className="group bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
               style={{
                 transformStyle: 'preserve-3d',
                 perspective: '1000px',
@@ -262,12 +270,12 @@ export function Landing() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-              <div className="relative z-10 w-14 h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                <TrendingUp className="w-7 h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
+              <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-4 sm:mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 relative z-10">Stock Analyzer</h3>
-              <p className="text-gray-400 leading-relaxed mb-4 relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 relative z-10">Stock Analyzer</h3>
+              <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-3 sm:mb-4 relative z-10">
                 Deep dive into individual stocks with comprehensive fundamental analysis, sentiment tracking, and key metrics to inform your investment decisions.
               </p>
               <ul className="space-y-2 text-sm text-gray-500 relative z-10">
@@ -286,7 +294,7 @@ export function Landing() {
               </ul>
             </div>
 
-            <div className="group bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
+            <div className="group bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
               style={{
                 transformStyle: 'preserve-3d',
                 perspective: '1000px',
@@ -294,12 +302,12 @@ export function Landing() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-              <div className="relative z-10 w-14 h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                <Zap className="w-7 h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
+              <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-4 sm:mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 relative z-10">AlphaEdge Evaluator</h3>
-              <p className="text-gray-400 leading-relaxed mb-4 relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 relative z-10">AlphaEdge Evaluator</h3>
+              <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-3 sm:mb-4 relative z-10">
                 Get intelligent Buy/Hold/Sell recommendations based on your position, current price, and detailed analysis with confidence scoring.
               </p>
               <ul className="space-y-2 text-sm text-gray-500 relative z-10">
@@ -320,7 +328,7 @@ export function Landing() {
           </div>
 
           {/* Additional Benefits */}
-          <div className="grid md:grid-cols-3 gap-8 mt-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12">
             <div className="group bg-gray-900 border border-gray-800 rounded-xl p-6 relative overflow-hidden transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-float">
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="flex items-center gap-3 mb-4 relative z-10">
@@ -362,15 +370,15 @@ export function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 px-6 border-t border-gray-900 bg-gray-950">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900 bg-gray-950">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">How It Works</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-4">
               Get started in minutes and start making smarter investment decisions
             </p>
           </div>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             <div className="text-center group">
               <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
                 <span className="text-2xl font-bold text-white relative z-10">1</span>
@@ -419,29 +427,29 @@ export function Landing() {
         </div>
       </section>
 
-      <section id="pricing" className="py-20 px-6 border-t border-gray-900">
+      <section id="pricing" className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-xl text-gray-400 mb-4">Choose the plan that fits your investment strategy</p>
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-3 sm:mb-4 px-4">Choose the plan that fits your investment strategy</p>
             <p className="text-gray-500 text-sm">Start with our free plan to explore all features</p>
           </div>
 
           {/* Free Plan Highlight */}
-          <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-gray-700 rounded-2xl p-8 mb-12 max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-gray-700 rounded-2xl p-6 sm:p-8 mb-8 sm:mb-12 max-w-3xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
                   <span className="bg-white text-black px-3 py-1 rounded-full text-xs font-semibold">FREE TRIAL</span>
-                  <h3 className="text-2xl font-bold">Free Plan</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold">Free Plan</h3>
                 </div>
-                <p className="text-gray-400">Perfect for trying out PortIQ</p>
+                <p className="text-gray-400 text-sm sm:text-base">Perfect for trying out PortIQ</p>
               </div>
-              <div className="text-right">
-                <span className="text-4xl font-bold">$0</span>
+              <div className="text-left sm:text-right">
+                <span className="text-3xl sm:text-4xl font-bold">$0</span>
               </div>
             </div>
-            <div className="grid md:grid-cols-3 gap-4 mt-6">
+            <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mt-6">
               <div className="bg-black border border-gray-800 rounded-lg p-4">
                 <div className="text-sm text-gray-400 mb-1">Portfolio Monitor</div>
                 <div className="text-lg font-bold">3 uses</div>
@@ -460,12 +468,12 @@ export function Landing() {
             </Link>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all hover:scale-105">
-              <h3 className="text-2xl font-bold mb-2">Monthly</h3>
-              <div className="mb-6">
-                <span className="text-5xl font-bold">₹499</span>
-                <span className="text-gray-400">/month</span>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all hover:scale-105">
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">Monthly</h3>
+              <div className="mb-4 sm:mb-6">
+                <span className="text-4xl sm:text-5xl font-bold">₹499</span>
+                <span className="text-gray-400 text-sm sm:text-base">/month</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
@@ -494,14 +502,14 @@ export function Landing() {
               </Link>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-800 to-black p-8 rounded-2xl border-2 border-gray-600 hover:border-gray-500 transition-all hover:scale-105 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-white text-black px-4 py-1 rounded-full text-sm font-semibold">
+            <div className="bg-gradient-to-br from-gray-800 to-black p-6 sm:p-8 rounded-2xl border-2 border-gray-600 hover:border-gray-500 transition-all hover:scale-105 relative">
+              <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 bg-white text-black px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold">
                 POPULAR
               </div>
-              <h3 className="text-2xl font-bold mb-2">Quarterly</h3>
-              <div className="mb-6">
-                <span className="text-5xl font-bold">₹1,299</span>
-                <span className="text-gray-400">/3 months</span>
+              <h3 className="text-xl sm:text-2xl font-bold mb-2 mt-2">Quarterly</h3>
+              <div className="mb-4 sm:mb-6">
+                <span className="text-4xl sm:text-5xl font-bold">₹1,299</span>
+                <span className="text-gray-400 text-sm sm:text-base">/3 months</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
@@ -530,11 +538,11 @@ export function Landing() {
               </Link>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all hover:scale-105">
-              <h3 className="text-2xl font-bold mb-2">Yearly</h3>
-              <div className="mb-6">
-                <span className="text-5xl font-bold">₹4,999</span>
-                <span className="text-gray-400">/year</span>
+            <div className="bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all hover:scale-105">
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">Yearly</h3>
+              <div className="mb-4 sm:mb-6">
+                <span className="text-4xl sm:text-5xl font-bold">₹4,999</span>
+                <span className="text-gray-400 text-sm sm:text-base">/year</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3">
@@ -567,15 +575,15 @@ export function Landing() {
       </section>
 
       {/* Use Cases */}
-      <section className="py-20 px-6 border-t border-gray-900 bg-gray-950">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900 bg-gray-950">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Who Can Benefit from PortIQ?</h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Who Can Benefit from PortIQ?</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-4">
               Whether you're a beginner or experienced investor, PortIQ has something for everyone
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-8">
               <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-gray-300" />
@@ -638,11 +646,11 @@ export function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-6 border-t border-gray-900">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-gray-400">
+          <div className="text-center mb-8 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Frequently Asked Questions</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 px-4">
               Everything you need to know about PortIQ
             </p>
           </div>
@@ -650,9 +658,9 @@ export function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-gray-900 py-12 px-6">
+      <footer className="border-t border-gray-900 py-8 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-6 h-6 text-gray-400" />
               <span className="text-xl font-bold">PortIQ</span>

@@ -140,29 +140,29 @@ export function StockAnalyzer() {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Section - Stock Analyzer */}
-          <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 flex flex-col relative overflow-hidden group animate-fade-in-up"
+          <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group animate-fade-in-up"
             style={{
               transformStyle: 'preserve-3d',
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none"></div>
-            <div className="mb-6 relative z-10">
-              <div className="flex items-center justify-between mb-2">
-                <h1 className="text-3xl font-bold text-white bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+            <div className="mb-4 sm:mb-6 relative z-10">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                   Stock Analyzer
                 </h1>
                 {remainingUses !== null && remainingUses !== Infinity && (
                   <div className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded-lg">
-                    <span className="text-sm text-gray-300">
+                    <span className="text-xs sm:text-sm text-gray-300">
                       {remainingUses} {remainingUses === 1 ? 'use' : 'uses'} left (one-time)
                     </span>
                   </div>
                 )}
               </div>
-              <p className="text-gray-400">Deep dive into individual stock analysis</p>
+              <p className="text-gray-400 text-sm sm:text-base">Deep dive into individual stock analysis</p>
             </div>
 
             <div className="mb-6 relative z-10">
@@ -233,18 +233,18 @@ export function StockAnalyzer() {
           </div>
 
           {/* Right Section - Analysis Results */}
-          <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 flex flex-col relative overflow-hidden group animate-fade-in-up animation-delay-200"
+          <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group animate-fade-in-up animation-delay-200"
             style={{
               transformStyle: 'preserve-3d',
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold text-white mb-2">Analysis Results</h2>
-              <p className="text-gray-400">Generated analysis and insights</p>
+            <div className="mb-4 sm:mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Analysis Results</h2>
+              <p className="text-gray-400 text-sm sm:text-base">Generated analysis and insights</p>
             </div>
 
-            <div className="flex-1 bg-black border border-gray-700 rounded-lg p-8 min-h-[400px] overflow-auto">
+            <div className="flex-1 bg-black border border-gray-700 rounded-lg p-4 sm:p-6 md:p-8 min-h-[300px] sm:min-h-[400px] overflow-auto">
               {!result ? (
                 <div className="flex flex-col items-center justify-center h-full">
                   <Calculator className="w-16 h-16 text-gray-600 mb-4" />

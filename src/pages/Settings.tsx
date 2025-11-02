@@ -188,13 +188,13 @@ export function Settings() {
     if (!usageStats) return null;
 
     return (
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 mb-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Usage Limits</h2>
-          <p className="text-gray-400">One-time usage for free plan (upgrade for unlimited access)</p>
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8 mb-6">
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Usage Limits</h2>
+          <p className="text-gray-400 text-sm sm:text-base">One-time usage for free plan (upgrade for unlimited access)</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="bg-black border border-gray-700 rounded-lg p-4">
             <h3 className="text-sm font-medium text-gray-400 mb-2">Portfolio Monitor</h3>
             <div className="flex items-center justify-between mb-2">
@@ -259,12 +259,12 @@ export function Settings() {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Settings</h1>
-          <p className="text-gray-400">Customize your application settings</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Settings</h1>
+          <p className="text-gray-400 text-sm sm:text-base">Customize your application settings</p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-6">
+        <div className="grid lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Left Sidebar - Settings Navigation */}
           <div className="lg:col-span-3">
             <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 relative overflow-hidden group animate-fade-in-up"
@@ -325,23 +325,23 @@ export function Settings() {
                 perspective: '1000px',
               }}
             >
-              <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 relative overflow-hidden group animate-fade-in-up"
+              <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden group animate-fade-in-up"
                 style={{
                   transformStyle: 'preserve-3d',
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-                <div className="mb-6 relative z-10">
-                  <h2 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                <div className="mb-4 sm:mb-6 relative z-10">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                     Profile Information
                   </h2>
-                  <p className="text-gray-400">Update your personal information</p>
+                  <p className="text-gray-400 text-sm sm:text-base">Update your personal information</p>
                 </div>
 
-                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                <form onSubmit={handleUpdateProfile} className="space-y-4 sm:space-y-6">
                   {/* First Name and Last Name in two columns */}
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">
                         First Name
@@ -458,18 +458,18 @@ export function Settings() {
             >
               <div className="space-y-6 animate-fade-in-up">
                   {/* Current Plan Section */}
-                  <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 mb-6 relative overflow-hidden group"
+                  <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8 mb-6 relative overflow-hidden group"
                     style={{
                       transformStyle: 'preserve-3d',
                     }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-                  <div className="mb-6 relative z-10">
-                    <h2 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                  <div className="mb-4 sm:mb-6 relative z-10">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                       Current Plan
                     </h2>
-                    <p className="text-gray-400">Your active subscription details</p>
+                    <p className="text-gray-400 text-sm sm:text-base">Your active subscription details</p>
                   </div>
 
                   <div className="bg-gradient-to-br from-gray-800 to-black border border-gray-700 rounded-xl p-6">
@@ -546,10 +546,10 @@ export function Settings() {
                 )}
 
                 {/* Available Plans Section */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">Available Plans</h2>
-                    <p className="text-gray-400">Choose a plan that fits your investment strategy</p>
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 md:p-8">
+                  <div className="mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Available Plans</h2>
+                    <p className="text-gray-400 text-sm sm:text-base">Choose a plan that fits your investment strategy</p>
                   </div>
 
                   {error && (
@@ -566,9 +566,9 @@ export function Settings() {
                     </div>
                   )}
 
-                  <div className="grid md:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Monthly Plan */}
-                    <div className={`bg-gradient-to-br from-gray-900 to-black p-6 rounded-xl border ${
+                    <div className={`bg-gradient-to-br from-gray-900 to-black p-4 sm:p-6 rounded-xl border ${
                       currentPlan === 'monthly' ? 'border-gray-600' : 'border-gray-800'
                     } ${currentPlan === 'monthly' ? 'ring-2 ring-gray-600' : ''}`}>
                       {currentPlan === 'monthly' && (

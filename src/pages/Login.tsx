@@ -54,30 +54,30 @@ export function Login() {
       ></div>
 
       <div className="w-full max-w-md relative z-10 animate-fade-in-up">
-        <div className="text-center mb-8">
-          <div className="flex flex-col items-center gap-6 mb-8">
-            <Link to="/" className="inline-flex items-center gap-3 group relative">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex flex-col items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <Link to="/" className="inline-flex items-center gap-2 sm:gap-3 group relative">
               <div className="relative">
-                <TrendingUp className="w-10 h-10 text-gray-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 <div className="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              <span className="text-3xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
+              <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
                 PortIQ
               </span>
             </Link>
             <div className="relative w-full">
-              <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
                 Welcome Back
               </h1>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-pink-500/20 blur-3xl animate-pulse opacity-50 -z-10"></div>
             </div>
-            <p className="text-gray-400 text-lg">Sign in to access your portfolio</p>
+            <p className="text-gray-400 text-base sm:text-lg">Sign in to access your portfolio</p>
           </div>
         </div>
 
         <form 
           onSubmit={handleSubmit} 
-          className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 relative overflow-hidden group"
+          className="bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden group"
           style={{
             transformStyle: 'preserve-3d',
             transform: `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 2}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -2}deg)`,
