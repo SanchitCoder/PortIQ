@@ -4,7 +4,7 @@ import { DashboardLayout } from '../components/DashboardLayout';
 import { AlertCircle, Calculator, Crown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { UsageService } from '../lib/usageService';
-import ReactMarkdown from 'react-markdown';
+import DOMPurify from 'dompurify';
 
 export function StockAnalyzer() {
   const { user } = useAuth();
@@ -255,11 +255,15 @@ export function StockAnalyzer() {
               ) : (
                 <div className="w-full">
                   <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                    <div className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed">
-                      <ReactMarkdown>
-                        {result}
-                      </ReactMarkdown>
-                    </div>
+                    <div 
+                      className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed"
+                      dangerouslySetInnerHTML={{ 
+                        __html: DOMPurify.sanitize(result, {
+                          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'a', 'img', 'div', 'span', 'blockquote', 'hr', 'code', 'pre'],
+                          ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'style', 'target', 'rel']
+                        })
+                      }}
+                    />
                   </div>
                 </div>
               )}
