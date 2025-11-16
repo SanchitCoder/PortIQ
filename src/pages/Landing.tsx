@@ -446,7 +446,7 @@ export function Landing() {
                 <p className="text-gray-400 text-sm sm:text-base">Perfect for trying out PortIQ</p>
               </div>
               <div className="text-left sm:text-right">
-                <span className="text-3xl sm:text-4xl font-bold">$0</span>
+                <span className="text-3xl sm:text-4xl font-bold">₹0</span>
               </div>
             </div>
             <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mt-6">

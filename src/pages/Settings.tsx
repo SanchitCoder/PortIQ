@@ -494,7 +494,7 @@ export function Settings() {
                       <div className="text-right">
                         {currentPlan === 'free' && (
                           <div>
-                            <span className="text-3xl font-bold text-white">$0</span>
+                            <span className="text-3xl font-bold text-white">₹0</span>
                             <span className="text-gray-400">/month</span>
                           </div>
                         )}
