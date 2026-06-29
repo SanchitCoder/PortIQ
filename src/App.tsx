@@ -9,6 +9,8 @@ import { PortfolioMonitor } from './pages/PortfolioMonitor';
 import { StockAnalyzer } from './pages/StockAnalyzer';
 import { AlphaEdgeEvaluator } from './pages/AlphaEdgeEvaluator';
 import { Settings } from './pages/Settings';
+import { ConvictionLedger } from './pages/ConvictionLedger';
+import { WhatIfEngine } from './pages/WhatIfEngine';
 
 function App() {
   return (
@@ -55,6 +57,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/journal"
+            element={
+              <ProtectedRoute>
+                <ConvictionLedger />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/stress-test"
+            element={
+              <ProtectedRoute>
+                <WhatIfEngine />
               </ProtectedRoute>
             }
           />

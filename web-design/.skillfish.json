@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "web-design",
+  "owner": "aviflombaum",
+  "repo": "claude-code-in-avinyc",
+  "path": "plugins/design-system/skills/web-design",
+  "branch": "main",
+  "sha": "4150128b2616dc5df9e0cf1b031b5af912d4d952",
+  "source": "manual"
+}

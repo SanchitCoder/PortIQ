@@ -1,684 +1,610 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, BarChart3, Zap, Twitter, Linkedin, Github, Check, Shield, Clock, Users, ArrowRight, ChevronDown, ChevronUp, Target, Brain, Sparkles } from 'lucide-react';
+import {
+  TrendingUp, BarChart3, Zap, Twitter, Linkedin, Github,
+  Check, Shield, Clock, ArrowRight, ChevronDown, ChevronUp,
+  Target, Brain, Sparkles, LineChart, PieChart, Activity,
+  TrendingDown, DollarSign, BookOpen, Star,
+} from 'lucide-react';
 import { Chatbot } from '../components/Chatbot';
 
-function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+/* ── Ticker tape data ─────────────────────────────────────────────────── */
+const TICKERS = [
+  { sym: 'AAPL',  price: '₹16,342', chg: '+1.24%', up: true },
+  { sym: 'TSLA',  price: '₹18,760', chg: '-0.87%', up: false },
+  { sym: 'RELIANCE', price: '₹2,948', chg: '+0.63%', up: true },
+  { sym: 'TCS',   price: '₹3,721', chg: '+1.02%', up: true },
+  { sym: 'NVDA',  price: '₹89,430', chg: '+3.15%', up: true },
+  { sym: 'HDFC',  price: '₹1,654', chg: '-0.41%', up: false },
+  { sym: 'INFY',  price: '₹1,823', chg: '+0.79%', up: true },
+  { sym: 'MSFT',  price: '₹31,200', chg: '+0.95%', up: true },
+  { sym: 'WIPRO', price: '₹478',   chg: '-0.22%', up: false },
+  { sym: 'AMZN',  price: '₹16,890', chg: '+1.48%', up: true },
+];
 
-  const faqs = [
-    {
-      question: 'What is PortIQ and how does it work?',
-      answer: 'PortIQ is an AI-powered investment analysis platform that helps you make smarter investment decisions. You can monitor your portfolio, analyze individual stocks, and get intelligent buy/hold/sell recommendations. Simply add your stocks, and our AI provides comprehensive analysis including risk assessment, fundamental metrics, and market sentiment.',
-    },
-    {
-      question: 'Do I need to pay to use PortIQ?',
-      answer: 'No! We offer a free plan that lets you try all features. Free users get 3 portfolio analyses, 2 stock analyses, and 1 AlphaEdge evaluation (one-time allocation). Once you use all your free uses, upgrade to get unlimited access to all features.',
-    },
-    {
-      question: 'How accurate are the AI recommendations?',
-      answer: 'Our AI models are trained on extensive market data and financial metrics. While no investment tool can guarantee returns, our recommendations are based on comprehensive analysis including fundamentals, technical indicators, and market sentiment. We maintain a 95%+ accuracy rate on our analysis predictions.',
-    },
-    {
-      question: 'Is my portfolio data secure?',
-      answer: 'Absolutely. We use industry-standard encryption to protect your data. Your portfolio information is stored securely and never shared with third parties. We comply with all data protection regulations.',
-    },
-    {
-      question: 'Can I cancel my subscription anytime?',
-      answer: 'Yes, you can cancel your subscription at any time from your Settings page. Your subscription will remain active until the end of your current billing period, and you\'ll retain access to all paid features until then.',
-    },
-    {
-      question: 'What payment methods do you accept?',
-      answer: 'We accept all major payment methods through Razorpay, including credit cards, debit cards, UPI, net banking, and digital wallets. All transactions are secure and encrypted.',
-    },
-    {
-      question: 'Do I need any technical knowledge to use PortIQ?',
-      answer: 'Not at all! PortIQ is designed to be intuitive and user-friendly. Simply enter stock symbols, and our AI does the complex analysis for you. The platform provides easy-to-understand insights and recommendations.',
-    },
-    {
-      question: 'How often is the data updated?',
-      answer: 'Our platform provides real-time analysis using the latest market data. Stock prices and metrics are updated continuously, ensuring you always have access to the most current information for making investment decisions.',
-    },
-  ];
-
+function TickerBar() {
+  const items = [...TICKERS, ...TICKERS];
   return (
-    <div className="space-y-4">
-      {faqs.map((faq, index) => (
-        <div key={index} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-          <button
-            onClick={() => setOpenIndex(openIndex === index ? null : index)}
-            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-800 transition-colors"
-          >
-            <span className="font-semibold text-white pr-4">{faq.question}</span>
-            {openIndex === index ? (
-              <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
-            )}
-          </button>
-          {openIndex === index && (
-            <div className="px-6 py-4 border-t border-gray-800">
-              <p className="text-gray-400 leading-relaxed">{faq.answer}</p>
-            </div>
-          )}
-        </div>
-      ))}
+    <div className="w-full overflow-hidden border-y border-white/[0.06] py-2.5 relative">
+      <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#03050C] to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#03050C] to-transparent z-10 pointer-events-none" />
+      <div className="flex gap-8 animate-ticker whitespace-nowrap" style={{ width: 'max-content' }}>
+        {items.map((t, i) => (
+          <div key={i} className="flex items-center gap-2.5 shrink-0">
+            <span className="font-mono text-xs text-[#9298B0] font-medium tracking-widest">{t.sym}</span>
+            <span className="font-mono text-xs text-[#F0EEE8]">{t.price}</span>
+            <span className={`font-mono text-xs flex items-center gap-1 ${t.up ? 'text-emerald-400' : 'text-red-400'}`}>
+              {t.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+              {t.chg}
+            </span>
+            <span className="text-white/10">|</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
+/* ── FAQ ─────────────────────────────────────────────────────────────── */
+const FAQS = [
+  { q: 'What is PortIQ and how does it work?', a: 'PortIQ is an AI-powered investment intelligence platform. Add your stock symbols, and our AI delivers comprehensive analysis — risk profiles, fundamental metrics, sentiment scoring, and actionable Buy/Hold/Sell recommendations — all within seconds.' },
+  { q: 'Do I need to pay to use PortIQ?', a: 'No. Every new account gets a free allocation: 3 portfolio analyses, 2 stock analyses, and 1 AlphaEdge evaluation. After your free uses are exhausted, upgrade to a paid plan for unlimited access.' },
+  { q: 'How accurate are the AI recommendations?', a: 'Our models are trained on extensive historical market data, fundamental indicators, and real-time sentiment signals. No tool guarantees returns, but our analysis framework is built to surface the most relevant signals for your decision-making.' },
+  { q: 'Is my portfolio data secure?', a: 'Absolutely. We use industry-standard encryption. Your portfolio data is never shared with third parties and is protected under strict data governance standards.' },
+  { q: 'Can I cancel my subscription anytime?', a: 'Yes — cancel at any time from Settings. You retain full access until the end of your billing period.' },
+  { q: 'What payment methods do you accept?', a: 'All major payment methods via Razorpay: credit/debit cards, UPI, net banking, and digital wallets. Every transaction is secured and encrypted.' },
+];
+
+function FAQItem({ faq, open, onToggle }: { faq: typeof FAQS[0]; open: boolean; onToggle: () => void }) {
+  return (
+    <div className="glass-card overflow-hidden hover-lift">
+      <button onClick={onToggle} className="w-full px-6 py-5 flex items-center justify-between text-left gap-4">
+        <span className="font-cormorant text-lg text-[#F0EEE8] font-medium leading-snug">{faq.q}</span>
+        <span className="shrink-0 w-7 h-7 rounded-full border border-white/10 flex items-center justify-center text-[#9298B0] transition-all duration-300" style={{ background: open ? 'rgba(201,168,76,0.12)' : undefined, borderColor: open ? 'rgba(201,168,76,0.3)' : undefined }}>
+          {open ? <ChevronUp className="w-4 h-4 text-[#C9A84C]" /> : <ChevronDown className="w-4 h-4" />}
+        </span>
+      </button>
+      {open && (
+        <div className="px-6 pb-5 border-t border-white/[0.06]">
+          <p className="text-[#9298B0] text-sm leading-relaxed pt-4">{faq.a}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Main ─────────────────────────────────────────────────────────────── */
 export function Landing() {
+  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
   const [showChatbot, setShowChatbot] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* Animated Background Gradient */}
-      <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-[#03050C] text-[#F0EEE8] relative overflow-hidden">
+
+      {/* ── Background ─────────────────────────────────────────────── */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Grid */}
+        <div className="absolute inset-0 bg-grid opacity-60" />
+        {/* Gold orbs */}
+        <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] rounded-full bg-[#C9A84C] opacity-[0.04] blur-[100px] animate-blob" />
+        <div className="absolute top-[20%] right-[5%] w-[400px] h-[400px] rounded-full bg-[#C9A84C] opacity-[0.03] blur-[120px] animate-blob animation-delay-2000" />
+        <div className="absolute bottom-[10%] left-[30%] w-[350px] h-[350px] rounded-full bg-amber-400 opacity-[0.025] blur-[100px] animate-blob animation-delay-4000" />
+        {/* Radial vignette */}
+        <div className="absolute inset-0 bg-radial-gradient" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.05) 0%, transparent 70%)' }} />
       </div>
-      
-      {/* 3D Grid Background */}
-      <div 
-        className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20"
-        style={{
-          transform: `perspective(1000px) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * 2}deg)`,
-          transformStyle: 'preserve-3d',
-        }}
-      ></div>
-      <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-sm border-b border-gray-800 z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <div className="relative">
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-gray-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
-              <div className="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+      {/* ── Nav ────────────────────────────────────────────────────── */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[#03050C]/90 backdrop-blur-xl border-b border-white/[0.07]' : 'bg-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.25)' }}>
+              <TrendingUp className="w-4 h-4 text-[#C9A84C]" />
             </div>
-            <span className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent group-hover:from-white group-hover:via-white group-hover:to-white transition-all duration-300">
-              PortIQ
+            <span className="font-cormorant text-xl font-semibold tracking-tight">
+              Port<span className="gold-text">IQ</span>
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-4">
-            <a href="#features" className="text-gray-400 hover:text-white transition-all duration-300 relative group">
-              Features
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-            </a>
-            <a href="#pricing" className="text-gray-400 hover:text-white transition-all duration-300 relative group">
-              Pricing
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-            </a>
-            <Link to="/login" className="text-gray-400 hover:text-white transition-all duration-300 relative group">
-              Login
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-            </Link>
-            <Link to="/signup" className="bg-white text-black px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 relative overflow-hidden group text-sm sm:text-base">
-              <span className="relative z-10">Get Started</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-            </Link>
+
+          <div className="hidden md:flex items-center gap-7">
+            {['features', 'pricing'].map(id => (
+              <a key={id} href={`#${id}`} className="text-[#9298B0] hover:text-[#F0EEE8] text-sm font-medium transition-colors duration-200 capitalize tracking-wide">{id}</a>
+            ))}
           </div>
-          <div className="flex md:hidden items-center gap-2">
-            <Link to="/login" className="text-gray-400 hover:text-white transition-colors text-sm px-3 py-1.5">
-              Login
-            </Link>
-            <Link to="/signup" className="bg-white text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 text-sm">
-              Get Started
-            </Link>
+
+          <div className="flex items-center gap-3">
+            <Link to="/login" className="hidden md:block text-[#9298B0] hover:text-[#F0EEE8] text-sm font-medium transition-colors duration-200">Sign In</Link>
+            <Link to="/login" className="btn-gold text-sm px-5 py-2.5">Get Started Free</Link>
           </div>
         </div>
       </nav>
 
-      <section ref={heroRef} className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 relative">
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="relative inline-block mb-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 tracking-tight relative">
-              <span className="relative z-10 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent animate-gradient">
-                Intelligence for
+      {/* ── Hero ───────────────────────────────────────────────────── */}
+      <section className="relative pt-28 sm:pt-36 pb-10 px-5 sm:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+            {/* Left: Copy */}
+            <div className="animate-fade-in-up">
+              <span className="label-tag mb-6 inline-flex items-center gap-2">
+                <Sparkles className="w-3 h-3" />
+                AI-Powered Investment Intelligence
               </span>
-              <br />
-              <span className="relative z-10 bg-gradient-to-r from-gray-300 via-white to-gray-100 bg-clip-text text-transparent animate-gradient animation-delay-1000">
-                Every Investor
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-pink-500/20 blur-3xl animate-pulse"></div>
-            </h1>
-          </div>
-          <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up px-4">
-            AI-powered portfolio monitoring, stock analysis, and investment evaluation to help you make smarter decisions in real-time. Transform your investment strategy with cutting-edge analytics.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12 animate-fade-in-up animation-delay-500 px-4">
-            <Link 
-              to="/signup" 
-              className="group bg-white text-black px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden hover:scale-105 hover:shadow-2xl hover:shadow-white/20 w-full sm:w-auto"
-              style={{
-                transform: `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1)`,
-                transformStyle: 'preserve-3d',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1.05)`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1)`;
-              }}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Get Started Free
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-            </Link>
-            <Link 
-              to="/login" 
-              className="bg-transparent border-2 border-gray-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:border-gray-500 transition-all duration-300 relative overflow-hidden group hover:scale-105 w-full sm:w-auto"
-              style={{
-                transform: `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1)`,
-                transformStyle: 'preserve-3d',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1.05)`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = `perspective(1000px) rotateY(${(mousePosition.x / window.innerWidth - 0.5) * 3}deg) rotateX(${(mousePosition.y / window.innerHeight - 0.5) * -3}deg) scale(1)`;
-              }}
-            >
-              <span className="relative z-10">Login</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-            </Link>
-          </div>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto mt-8 sm:mt-16 px-4">
-            {[
-              { value: '10K+', label: 'Active Users', delay: '0ms' },
-              { value: '50K+', label: 'Analyses Performed', delay: '200ms' },
-              { value: '95%', label: 'Accuracy Rate', delay: '400ms' },
-              { value: '24/7', label: 'AI Support', delay: '600ms' },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="bg-gray-900/80 backdrop-blur-sm border border-gray-800 rounded-xl p-4 sm:p-6 relative overflow-hidden group hover:border-gray-700 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 animate-fade-in-up"
-                style={{ animationDelay: stat.delay }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10">
-                  <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                    {stat.value}
+
+              <h1 className="display-xl mb-6 mt-3 leading-none">
+                <span className="text-[#F0EEE8]">Your Portfolio,</span>
+                <br />
+                <span className="gold-text italic">Analysed by AI</span>
+              </h1>
+
+              <p className="body-lg max-w-lg mb-8 text-[#9298B0]">
+                Get institutional-grade portfolio insights, deep stock analysis, and precise Buy/Hold/Sell signals — in seconds. Built for investors who demand an edge.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 mb-10">
+                <Link to="/login" className="btn-gold inline-flex items-center justify-center gap-2 text-base px-7 py-3.5">
+                  Start Free — No Credit Card
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link to="/login" className="btn-glass inline-flex items-center justify-center gap-2 text-base px-7 py-3.5">
+                  Sign In
+                </Link>
+              </div>
+
+              {/* Trust row */}
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[#4A4E65] text-xs">
+                {['10,000+ active investors', 'Bank-grade security', 'No setup required'].map(t => (
+                  <span key={t} className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Dashboard preview */}
+            <div className="animate-fade-in-up animation-delay-200 relative">
+              {/* Glow halo */}
+              <div className="absolute -inset-6 rounded-3xl blur-3xl pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)' }} />
+
+              {/* Main card */}
+              <div className="relative rounded-2xl overflow-hidden"
+                style={{
+                  background: 'rgba(8,10,20,0.82)',
+                  backdropFilter: 'blur(40px) saturate(180%)',
+                  border: '1px solid rgba(201,168,76,0.18)',
+                  boxShadow: '0 32px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
+                }}>
+
+                {/* Card header */}
+                <div className="flex items-center justify-between px-5 py-4"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center"
+                      style={{ background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.22)' }}>
+                      <TrendingUp className="w-3.5 h-3.5 text-[#C9A84C]" />
+                    </div>
+                    <span className="text-[#F0EEE8] text-sm font-semibold">Portfolio Overview</span>
                   </div>
-                  <div className="text-gray-400 text-xs sm:text-sm">{stat.label}</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-emerald-400 text-xs font-medium">Live</span>
+                  </div>
                 </div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full blur-2xl transform group-hover:scale-150 transition-transform duration-500"></div>
+
+                {/* Portfolio value + sparkline */}
+                <div className="px-5 pt-5 pb-4">
+                  <p className="text-[#4A4E65] text-xs uppercase tracking-widest mb-1.5">Total Portfolio Value</p>
+                  <div className="flex items-end justify-between mb-4">
+                    <div>
+                      <span className="number-display text-3xl text-[#F0EEE8] font-medium">₹12,84,320</span>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400 text-sm font-medium">+₹28,640</span>
+                        <span className="text-[#4A4E65] text-xs">(+2.28%) today</span>
+                      </div>
+                    </div>
+                    <span className="label-tag text-[0.65rem]">1M: +18.4%</span>
+                  </div>
+
+                  {/* Sparkline SVG */}
+                  <div className="w-full h-16">
+                    <svg viewBox="0 0 320 60" className="w-full h-full" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#34d399" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#34d399" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M0 52 C15 50,28 54,42 44 S60 34,78 36 S100 26,118 22 S140 28,158 18 S178 10,196 12 S220 8,242 5 S272 9,300 4 S312 6,320 2 L320 60 L0 60 Z"
+                        fill="url(#sparkGrad)" />
+                      <path d="M0 52 C15 50,28 54,42 44 S60 34,78 36 S100 26,118 22 S140 28,158 18 S178 10,196 12 S220 8,242 5 S272 9,300 4 S312 6,320 2"
+                        fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Top holdings */}
+                <div className="px-5 pb-4">
+                  <p className="text-[#4A4E65] text-xs uppercase tracking-widest mb-3">Top Holdings</p>
+                  <div className="space-y-2">
+                    {[
+                      { sym: 'RLNC', name: 'RELIANCE', price: '₹2,948', chg: '+0.63%', up: true, alloc: '35%' },
+                      { sym: 'TCS', name: 'TCS', price: '₹3,721', chg: '+1.02%', up: true, alloc: '28%' },
+                      { sym: 'NVDA', name: 'NVIDIA', price: '₹89,430', chg: '+3.15%', up: true, alloc: '22%' },
+                    ].map(s => (
+                      <div key={s.sym} className="flex items-center justify-between px-3 py-2.5 rounded-xl"
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.15)' }}>
+                            <span className="font-mono text-[0.5rem] text-[#C9A84C] font-bold">{s.sym.slice(0,2)}</span>
+                          </div>
+                          <div>
+                            <p className="font-mono text-xs text-[#F0EEE8] font-medium">{s.name}</p>
+                            <p className="text-[#4A4E65] text-[0.6rem]">{s.alloc} alloc.</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-mono text-xs text-[#F0EEE8]">{s.price}</p>
+                          <p className={`font-mono text-[0.6rem] flex items-center gap-0.5 justify-end ${s.up ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {s.up ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+                            {s.chg}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* AlphaEdge signal strip */}
+                <div className="mx-5 mb-5 rounded-xl px-4 py-3 flex items-center justify-between"
+                  style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
+                  <div className="flex items-center gap-2.5">
+                    <Zap className="w-4 h-4 text-[#C9A84C] shrink-0" />
+                    <div>
+                      <p className="text-[#F0EEE8] text-xs font-semibold leading-none">AlphaEdge Signal</p>
+                      <p className="text-[#4A4E65] text-[0.6rem] mt-0.5">RELIANCE · Just now</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold tracking-wider"
+                      style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399', border: '1px solid rgba(52,211,153,0.3)' }}>
+                      BUY
+                    </span>
+                    <span className="text-[#4A4E65] text-xs font-mono">87% conf.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating badge: Return */}
+              <div className="absolute -left-5 top-[22%] rounded-xl px-3 py-2.5 hidden lg:flex items-center gap-2 animate-float"
+                style={{
+                  background: 'rgba(6,10,20,0.92)', backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(52,211,153,0.25)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                }}>
+                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div>
+                  <p className="text-emerald-400 text-xs font-semibold leading-none">+18.4%</p>
+                  <p className="text-[#4A4E65] text-[0.6rem] mt-0.5 leading-none">1M Return</p>
+                </div>
+              </div>
+
+              {/* Floating badge: Risk */}
+              <div className="absolute -right-5 bottom-[22%] rounded-xl px-3 py-2.5 hidden lg:flex items-center gap-2 animate-float animation-delay-2000"
+                style={{
+                  background: 'rgba(6,10,20,0.92)', backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(201,168,76,0.25)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                }}>
+                <Shield className="w-4 h-4 text-[#C9A84C] shrink-0" />
+                <div>
+                  <p className="text-[#C9A84C] text-xs font-semibold leading-none">Low Risk</p>
+                  <p className="text-[#4A4E65] text-[0.6rem] mt-0.5 leading-none">Score: 32 / 100</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── Ticker ─────────────────────────────────────────────────── */}
+      <div className="animate-fade-in-up animation-delay-500 my-8">
+        <TickerBar />
+      </div>
+
+      {/* ── How It Works ───────────────────────────────────────────── */}
+      <section className="py-20 px-5 sm:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 animate-fade-in-up">
+            <span className="label-tag mb-4 inline-block">The Process</span>
+            <h2 className="display-md text-[#F0EEE8] mt-3 mb-3">From Data to Decisions</h2>
+            <p className="text-[#9298B0] text-base max-w-xl mx-auto">Our AI does the heavy lifting so you can focus on what matters — the final call.</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { n: '01', icon: BookOpen, title: 'Input Your Stocks', desc: 'Add any stock symbols — Indian or global markets. Our system recognises all major exchanges.' },
+              { n: '02', icon: Activity, title: 'AI Processes Data', desc: 'Fundamentals, technicals, sentiment, and macroeconomic signals are all parsed simultaneously.' },
+              { n: '03', icon: Brain, title: 'Get Deep Analysis', desc: 'Receive a comprehensive report with risk assessment, metrics, and pattern recognition insights.' },
+              { n: '04', icon: Target, title: 'Act with Confidence', desc: 'Use Buy/Hold/Sell recommendations with confidence scores to make your final investment call.' },
+            ].map((s, i) => (
+              <div key={i} className={`glass-card p-7 hover-lift animate-fade-in-up animation-delay-${i * 100 + 200}`}>
+                <div className="flex items-start justify-between mb-5">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}>
+                    <s.icon className="w-5 h-5 text-[#C9A84C]" />
+                  </div>
+                  <span className="number-display text-xs text-[#3A3E55] font-medium">{s.n}</span>
+                </div>
+                <h3 className="heading-sm text-[#F0EEE8] mb-2">{s.title}</h3>
+                <p className="text-[#9298B0] text-sm leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="features" className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Powerful Features for Smart Investing</h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-4">
-              Everything you need to make informed investment decisions, all in one platform
-            </p>
+      {/* ── Features ───────────────────────────────────────────────── */}
+      <section id="features" className="py-20 px-5 sm:px-8 border-t border-white/[0.05]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 animate-fade-in-up">
+            <span className="label-tag mb-4 inline-block">Platform Features</span>
+            <h2 className="display-md text-[#F0EEE8] mt-3 mb-3">Everything You Need to Invest Smarter</h2>
+            <p className="text-[#9298B0] text-base max-w-xl mx-auto">Three powerful AI engines, one seamless platform.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
-            <div className="group bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
-              style={{
-                transformStyle: 'preserve-3d',
-                perspective: '1000px',
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-              <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-4 sm:mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+          <div className="grid lg:grid-cols-3 gap-6 mb-10">
+            {/* Portfolio Monitor */}
+            <div className="glass-card-gold p-8 hover-lift animate-fade-in-up animation-delay-100 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)' }} />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style={{ background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.25)' }}>
+                  <BarChart3 className="w-6 h-6 text-[#C9A84C]" />
+                </div>
+                <h3 className="heading-sm text-[#F0EEE8] mb-3">Portfolio Monitor</h3>
+                <p className="text-[#9298B0] text-sm leading-relaxed mb-5">
+                  Track multiple stocks simultaneously. Get AI-driven risk scoring, diversification gaps, concentration alerts, and overall portfolio health — all in one glance.
+                </p>
+                <ul className="space-y-2.5">
+                  {['Multi-stock AI analysis', 'Risk & diversification scoring', 'Portfolio health insights', 'Concentration warnings'].map(f => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-[#9298B0]">
+                      <Check className="w-3.5 h-3.5 text-[#C9A84C] shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 relative z-10">Portfolio Monitor</h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-3 sm:mb-4 relative z-10">
-                Track multiple stocks simultaneously with AI-driven insights on risk, diversification, and performance. Get real-time portfolio health assessments.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-500 relative z-10">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Multi-stock portfolio analysis</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Risk assessment and diversification scoring</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Performance metrics and insights</span>
-                </li>
-              </ul>
             </div>
 
-            <div className="group bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
-              style={{
-                transformStyle: 'preserve-3d',
-                perspective: '1000px',
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-              <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-4 sm:mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            {/* Stock Analyzer */}
+            <div className="glass-card p-8 hover-lift animate-fade-in-up animation-delay-200 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)' }} />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-white/[0.06] border border-white/[0.1]">
+                  <LineChart className="w-6 h-6 text-[#F0EEE8]" />
+                </div>
+                <h3 className="heading-sm text-[#F0EEE8] mb-3">Stock Analyzer</h3>
+                <p className="text-[#9298B0] text-sm leading-relaxed mb-5">
+                  Deep-dive into any stock. Fundamentals, market sentiment, financial ratios, growth metrics, and peer comparison — synthesised into a clear, actionable report.
+                </p>
+                <ul className="space-y-2.5">
+                  {['Fundamental analysis', 'Real-time sentiment tracking', 'Key financial ratios', 'Peer comparison'].map(f => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-[#9298B0]">
+                      <Check className="w-3.5 h-3.5 text-[#9298B0] shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 relative z-10">Stock Analyzer</h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-3 sm:mb-4 relative z-10">
-                Deep dive into individual stocks with comprehensive fundamental analysis, sentiment tracking, and key metrics to inform your investment decisions.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-500 relative z-10">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Comprehensive fundamental analysis</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Market sentiment tracking</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Key financial metrics and ratios</span>
-                </li>
-              </ul>
             </div>
 
-            <div className="group bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-700 transition-all duration-500 relative overflow-hidden transform hover:scale-105 hover:-translate-y-2"
-              style={{
-                transformStyle: 'preserve-3d',
-                perspective: '1000px',
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
-              <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 bg-gray-800 rounded-xl flex items-center justify-center mb-4 sm:mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-gray-300 group-hover:text-white transition-colors duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            {/* AlphaEdge Evaluator */}
+            <div className="glass-card p-8 hover-lift animate-fade-in-up animation-delay-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)' }} />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 bg-white/[0.06] border border-white/[0.1]">
+                  <Zap className="w-6 h-6 text-[#F0EEE8]" />
+                </div>
+                <h3 className="heading-sm text-[#F0EEE8] mb-3">AlphaEdge Evaluator</h3>
+                <p className="text-[#9298B0] text-sm leading-relaxed mb-5">
+                  Tell the AI your buy price, current price, and context — receive a precise Buy, Hold, or Sell recommendation with a confidence score and detailed reasoning.
+                </p>
+                <ul className="space-y-2.5">
+                  {['Buy / Hold / Sell signals', 'Confidence scoring', 'Position-aware reasoning', 'Exit strategy suggestions'].map(f => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-[#9298B0]">
+                      <Check className="w-3.5 h-3.5 text-[#9298B0] shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 relative z-10">AlphaEdge Evaluator</h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-3 sm:mb-4 relative z-10">
-                Get intelligent Buy/Hold/Sell recommendations based on your position, current price, and detailed analysis with confidence scoring.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-500 relative z-10">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>AI-powered buy/hold/sell recommendations</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Confidence scoring for each recommendation</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Position-based analysis and reasoning</span>
-                </li>
-              </ul>
             </div>
           </div>
 
-          {/* Additional Benefits */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12">
-            <div className="group bg-gray-900 border border-gray-800 rounded-xl p-6 relative overflow-hidden transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-float">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="flex items-center gap-3 mb-4 relative z-10">
-                <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-white/10 transition-colors duration-300">
-                  <Brain className="w-6 h-6 text-gray-300 group-hover:text-white group-hover:animate-pulse transition-all duration-300" />
+          {/* Secondary benefit cards */}
+          <div className="grid sm:grid-cols-3 gap-5">
+            {[
+              { icon: Brain, title: 'Advanced AI Models', desc: 'Built on large language models fine-tuned for financial analysis and market intelligence.' },
+              { icon: Clock, title: 'Real-Time Analysis', desc: 'Analysis generated on-demand with the latest market data, not stale cached reports.' },
+              { icon: Shield, title: 'Bank-Grade Security', desc: 'Your portfolio data is encrypted end-to-end. Zero data sharing with third parties.' },
+            ].map((b, i) => (
+              <div key={i} className="glass-card p-6 flex items-start gap-4 hover-lift animate-fade-in-up" style={{ animationDelay: `${i * 100 + 400}ms` }}>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)' }}>
+                  <b.icon className="w-4.5 h-4.5 text-[#C9A84C] w-[18px] h-[18px]" />
                 </div>
-                <h4 className="text-lg font-bold">AI-Powered Insights</h4>
-              </div>
-              <p className="text-gray-400 text-sm relative z-10">
-                Leverage advanced machine learning algorithms to get actionable investment insights and predictions.
-              </p>
-            </div>
-            <div className="group bg-gray-900 border border-gray-800 rounded-xl p-6 relative overflow-hidden transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-float" style={{ animationDelay: '2s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="flex items-center gap-3 mb-4 relative z-10">
-                <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-white/10 transition-colors duration-300">
-                  <Clock className="w-6 h-6 text-gray-300 group-hover:text-white group-hover:animate-pulse transition-all duration-300" />
+                <div>
+                  <h4 className="font-semibold text-[#F0EEE8] mb-1 text-sm">{b.title}</h4>
+                  <p className="text-[#9298B0] text-xs leading-relaxed">{b.desc}</p>
                 </div>
-                <h4 className="text-lg font-bold">Real-Time Updates</h4>
               </div>
-              <p className="text-gray-400 text-sm relative z-10">
-                Get instant analysis and recommendations as market conditions change, keeping you ahead of the curve.
-              </p>
-            </div>
-            <div className="group bg-gray-900 border border-gray-800 rounded-xl p-6 relative overflow-hidden transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 animate-float" style={{ animationDelay: '4s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="flex items-center gap-3 mb-4 relative z-10">
-                <div className="p-2 bg-gray-800 rounded-lg group-hover:bg-white/10 transition-colors duration-300">
-                  <Shield className="w-6 h-6 text-gray-300 group-hover:text-white group-hover:animate-pulse transition-all duration-300" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Use Cases Banner ────────────────────────────────────────── */}
+      <section className="py-16 px-5 sm:px-8 border-t border-white/[0.05]">
+        <div className="max-w-6xl mx-auto">
+          <div className="glass-card-gold p-8 sm:p-12 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)' }} />
+            <div className="relative z-10 grid md:grid-cols-3 gap-8">
+              {[
+                { icon: PieChart, who: 'Individual Investors', desc: 'Understand your holdings, assess risk, and get clear buy/hold/sell guidance on your personal portfolio.' },
+                { icon: Activity, who: 'Active Traders', desc: 'Lightning-fast analysis and recommendations. Evaluate any position in seconds before the market moves.' },
+                { icon: DollarSign, who: 'Research Analysts', desc: 'Comprehensive fundamental reports, sentiment scores, and financial metrics for thorough due diligence.' },
+              ].map((u, i) => (
+                <div key={i} className="flex flex-col gap-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}>
+                    <u.icon className="w-5 h-5 text-[#C9A84C]" />
+                  </div>
+                  <div>
+                    <h3 className="heading-sm text-[#F0EEE8] mb-2">{u.who}</h3>
+                    <p className="text-[#9298B0] text-sm leading-relaxed">{u.desc}</p>
+                  </div>
                 </div>
-                <h4 className="text-lg font-bold">Secure & Private</h4>
-              </div>
-              <p className="text-gray-400 text-sm relative z-10">
-                Your data is encrypted and secure. We never share your portfolio information with third parties.
-              </p>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900 bg-gray-950">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">How It Works</h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-4">
-              Get started in minutes and start making smarter investment decisions
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
-                <span className="text-2xl font-bold text-white relative z-10">1</span>
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 border-2 border-white/20 rounded-full scale-150 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500"></div>
-              </div>
-              <h3 className="text-lg font-bold mb-2">Sign Up Free</h3>
-              <p className="text-gray-400 text-sm">
-                Create your account in seconds. No credit card required to start.
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" style={{ animationDelay: '1s' }}>
-                <span className="text-2xl font-bold text-white relative z-10">2</span>
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 border-2 border-white/20 rounded-full scale-150 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500"></div>
-              </div>
-              <h3 className="text-lg font-bold mb-2">Add Your Stocks</h3>
-              <p className="text-gray-400 text-sm">
-                Input your portfolio or analyze individual stocks you're interested in.
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" style={{ animationDelay: '2s' }}>
-                <span className="text-2xl font-bold text-white relative z-10">3</span>
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 border-2 border-white/20 rounded-full scale-150 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500"></div>
-              </div>
-              <h3 className="text-lg font-bold mb-2">Get AI Analysis</h3>
-              <p className="text-gray-400 text-sm">
-                Receive comprehensive analysis, risk assessments, and actionable insights.
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" style={{ animationDelay: '3s' }}>
-                <span className="text-2xl font-bold text-white relative z-10">4</span>
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 border-2 border-white/20 rounded-full scale-150 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500"></div>
-              </div>
-              <h3 className="text-lg font-bold mb-2">Make Decisions</h3>
-              <p className="text-gray-400 text-sm">
-                Use our recommendations and insights to make informed investment choices.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="pricing" className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-3 sm:mb-4 px-4">Choose the plan that fits your investment strategy</p>
-            <p className="text-gray-500 text-sm">Start with our free plan to explore all features</p>
+      {/* ── Pricing ─────────────────────────────────────────────────── */}
+      <section id="pricing" className="py-20 px-5 sm:px-8 border-t border-white/[0.05]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14 animate-fade-in-up">
+            <span className="label-tag mb-4 inline-block">Pricing</span>
+            <h2 className="display-md text-[#F0EEE8] mt-3 mb-3">Simple, Transparent Pricing</h2>
+            <p className="text-[#9298B0] text-base max-w-xl mx-auto">Start free, upgrade when you're ready for unlimited access.</p>
           </div>
 
-          {/* Free Plan Highlight */}
-          <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-gray-700 rounded-2xl p-6 sm:p-8 mb-8 sm:mb-12 max-w-3xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+          {/* Free tier */}
+          <div className="glass-card p-7 sm:p-8 mb-8 max-w-2xl mx-auto animate-fade-in-up animation-delay-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="bg-white text-black px-3 py-1 rounded-full text-xs font-semibold">FREE TRIAL</span>
-                  <h3 className="text-xl sm:text-2xl font-bold">Free Plan</h3>
-                </div>
-                <p className="text-gray-400 text-sm sm:text-base">Perfect for trying out PortIQ</p>
+                <span className="label-tag mb-2 inline-block">FREE PLAN</span>
+                <h3 className="display-md text-[#F0EEE8] mt-1">Try Everything</h3>
+                <p className="text-[#9298B0] text-sm mt-1">No credit card required. One-time allocation.</p>
               </div>
               <div className="text-left sm:text-right">
-                <span className="text-3xl sm:text-4xl font-bold">₹0</span>
+                <span className="number-display text-4xl text-[#F0EEE8]">₹0</span>
               </div>
             </div>
-            <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mt-6">
-              <div className="bg-black border border-gray-800 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Portfolio Monitor</div>
-                <div className="text-lg font-bold">3 uses</div>
-              </div>
-              <div className="bg-black border border-gray-800 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Stock Analyzer</div>
-                <div className="text-lg font-bold">2 uses</div>
-              </div>
-              <div className="bg-black border border-gray-800 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">AlphaEdge Evaluator</div>
-                <div className="text-lg font-bold">1 use</div>
-              </div>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { feature: 'Portfolio Monitor', uses: '3 analyses' },
+                { feature: 'Stock Analyzer', uses: '2 analyses' },
+                { feature: 'AlphaEdge', uses: '1 evaluation' },
+              ].map(item => (
+                <div key={item.feature} className="rounded-xl p-4 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="text-[#4A4E65] text-xs mb-1.5 leading-tight">{item.feature}</div>
+                  <div className="number-display text-sm text-[#F0EEE8] font-medium">{item.uses}</div>
+                </div>
+              ))}
             </div>
-            <Link to="/signup" className="block w-full mt-6 bg-white text-black py-3 rounded-lg text-center font-semibold hover:bg-gray-200 transition-colors">
-              Start Free Trial
+            <Link to="/login" className="btn-glass w-full inline-flex items-center justify-center gap-2 text-sm py-3">
+              Start Free Trial <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all hover:scale-105">
-              <h3 className="text-xl sm:text-2xl font-bold mb-2">Monthly</h3>
-              <div className="mb-4 sm:mb-6">
-                <span className="text-4xl sm:text-5xl font-bold">₹499</span>
-                <span className="text-gray-400 text-sm sm:text-base">/month</span>
+          {/* Paid tiers */}
+          <div className="grid sm:grid-cols-3 gap-5">
+            {[
+              { id: 'monthly', label: 'Monthly', price: '₹499', per: '/month', popular: false, savings: null },
+              { id: 'quarterly', label: 'Quarterly', price: '₹1,299', per: '/3 months', popular: true, savings: 'Save 13%' },
+              { id: 'yearly', label: 'Yearly', price: '₹4,999', per: '/year', popular: false, savings: 'Save 17%' },
+            ].map((plan) => (
+              <div key={plan.id} className={`relative p-7 hover-lift animate-fade-in-up rounded-3xl overflow-hidden ${plan.popular ? 'gold-glow-card' : 'glass-card'}`}
+                style={plan.popular ? { background: 'rgba(201,168,76,0.05)', border: '1px solid rgba(201,168,76,0.22)' } : undefined}
+              >
+                {plan.popular && (
+                  <div className="absolute top-4 right-4">
+                    <span className="label-tag flex items-center gap-1 text-[0.65rem]">
+                      <Star className="w-2.5 h-2.5 fill-[#C9A84C]" /> Popular
+                    </span>
+                  </div>
+                )}
+                <h3 className="heading-sm text-[#F0EEE8] mb-3">{plan.label}</h3>
+                <div className="mb-5">
+                  <span className="number-display text-3xl text-[#F0EEE8]">{plan.price}</span>
+                  <span className="text-[#9298B0] text-sm ml-1">{plan.per}</span>
+                </div>
+                <ul className="space-y-2.5 mb-7">
+                  {['Unlimited portfolio tracking', 'Unlimited stock analysis', 'Unlimited AlphaEdge evaluations', 'Real-time AI insights', ...(plan.savings ? [plan.savings] : [])].map((f, fi) => (
+                    <li key={fi} className="flex items-center gap-2.5 text-sm">
+                      <Check className={`w-3.5 h-3.5 shrink-0 ${fi === 4 && plan.savings ? 'text-[#C9A84C]' : plan.popular ? 'text-[#C9A84C]' : 'text-[#9298B0]'}`} />
+                      <span className={fi === 4 && plan.savings ? 'gold-text font-semibold' : 'text-[#9298B0]'}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/login" className={`w-full inline-flex items-center justify-center gap-2 text-sm py-3 rounded-xl font-medium transition-all duration-300 ${plan.popular ? 'btn-gold' : 'btn-glass'}`}>
+                  Get Started
+                </Link>
               </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-300">Unlimited portfolio tracking</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-300">Unlimited AI stock analysis</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-300">Unlimited AlphaEdge evaluations</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-300">Real-time insights and alerts</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-300">Priority customer support</span>
-                </li>
-              </ul>
-              <Link to="/signup" className="block w-full bg-gray-800 text-white py-3 rounded-lg text-center font-semibold hover:bg-gray-700 transition-colors">
-                Get Started
-              </Link>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="bg-gradient-to-br from-gray-800 to-black p-6 sm:p-8 rounded-2xl border-2 border-gray-600 hover:border-gray-500 transition-all hover:scale-105 relative">
-              <div className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 bg-white text-black px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                POPULAR
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold mb-2 mt-2">Quarterly</h3>
-              <div className="mb-4 sm:mb-6">
-                <span className="text-4xl sm:text-5xl font-bold">₹1,299</span>
-                <span className="text-gray-400 text-sm sm:text-base">/3 months</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">Unlimited portfolio tracking</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">AI stock analysis</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">AlphaEdge evaluations</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">Real-time insights</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-white" />
-                  <span className="text-white font-semibold">Save 13%</span>
-                </li>
-              </ul>
-              <Link to="/signup" className="block w-full bg-white text-black py-3 rounded-lg text-center font-semibold hover:bg-gray-200 transition-colors">
-                Get Started
-              </Link>
-            </div>
+      {/* ── FAQ ─────────────────────────────────────────────────────── */}
+      <section className="py-20 px-5 sm:px-8 border-t border-white/[0.05]">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12 animate-fade-in-up">
+            <span className="label-tag mb-4 inline-block">FAQ</span>
+            <h2 className="display-md text-[#F0EEE8] mt-3">Frequently Asked Questions</h2>
+          </div>
+          <div className="space-y-3">
+            {FAQS.map((faq, i) => (
+              <FAQItem key={i} faq={faq} open={openFAQ === i} onToggle={() => setOpenFAQ(openFAQ === i ? null : i)} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all hover:scale-105">
-              <h3 className="text-xl sm:text-2xl font-bold mb-2">Yearly</h3>
-              <div className="mb-4 sm:mb-6">
-                <span className="text-4xl sm:text-5xl font-bold">₹4,999</span>
-                <span className="text-gray-400 text-sm sm:text-base">/year</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">Unlimited portfolio tracking</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">AI stock analysis</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">AlphaEdge evaluations</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-300">Real-time insights</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-white" />
-                  <span className="text-white font-semibold">Save 17%</span>
-                </li>
-              </ul>
-              <Link to="/signup" className="block w-full bg-gray-800 text-white py-3 rounded-lg text-center font-semibold hover:bg-gray-700 transition-colors">
-                Get Started
+      {/* ── CTA Banner ──────────────────────────────────────────────── */}
+      <section className="py-20 px-5 sm:px-8 border-t border-white/[0.05]">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="glass-card-gold p-10 sm:p-14 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid opacity-20 pointer-events-none" />
+            <div className="relative z-10">
+              <span className="label-tag mb-6 inline-block">Start Today</span>
+              <h2 className="display-lg text-[#F0EEE8] mb-4 mt-3">Ready to Invest Smarter?</h2>
+              <p className="text-[#9298B0] mb-8 text-base">Join thousands of investors already using PortIQ to make data-driven decisions. Free to start, no credit card required.</p>
+              <Link to="/login" className="btn-gold inline-flex items-center gap-2 text-base px-8 py-4">
+                Create Free Account <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Use Cases */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900 bg-gray-950">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Who Can Benefit from PortIQ?</h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-4">
-              Whether you're a beginner or experienced investor, PortIQ has something for everyone
-            </p>
+      {/* ── Footer ──────────────────────────────────────────────────── */}
+      <footer className="border-t border-white/[0.05] py-10 px-5 sm:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}>
+              <TrendingUp className="w-3.5 h-3.5 text-[#C9A84C]" />
+            </div>
+            <span className="font-cormorant text-lg font-semibold">Port<span className="gold-text">IQ</span></span>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-8">
-              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center mb-4">
-                <Users className="w-6 h-6 text-gray-300" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Individual Investors</h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4">
-                Make informed decisions on your personal portfolio. Understand risk levels, diversify effectively, and get AI-powered recommendations tailored to your investments.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Personal portfolio management</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Risk assessment for your holdings</span>
-                </li>
-              </ul>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-8">
-              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center mb-4">
-                <Target className="w-6 h-6 text-gray-300" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Active Traders</h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4">
-                Get real-time analysis and instant recommendations. Evaluate positions quickly and make fast decisions based on AI-powered insights and market sentiment.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Quick stock evaluations</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Instant buy/hold/sell recommendations</span>
-                </li>
-              </ul>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-8">
-              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center mb-4">
-                <Brain className="w-6 h-6 text-gray-300" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Research Analysts</h3>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4">
-                Deep dive into fundamentals and market data. Get comprehensive analysis reports with sentiment tracking and detailed metrics for thorough research.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Comprehensive fundamental analysis</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span>Detailed financial metrics and reports</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-12 sm:py-20 px-4 sm:px-6 border-t border-gray-900">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Frequently Asked Questions</h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 px-4">
-              Everything you need to know about PortIQ
-            </p>
-          </div>
-          <FAQSection />
-        </div>
-      </section>
-
-      <footer className="border-t border-gray-900 py-8 sm:py-12 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-gray-400" />
-              <span className="text-xl font-bold">PortIQ</span>
-            </div>
-            <div className="flex gap-6">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="w-5 h-5" />
+          <p className="text-[#4A4E65] text-xs">© 2025 PortIQ. All rights reserved. Not financial advice.</p>
+          <div className="flex gap-5">
+            {[
+              { Icon: Twitter, href: 'https://twitter.com' },
+              { Icon: Linkedin, href: 'https://linkedin.com' },
+              { Icon: Github, href: 'https://github.com' },
+            ].map(({ Icon, href }, i) => (
+              <a key={i} href={href} target="_blank" rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[#4A4E65] hover:text-[#C9A84C] transition-colors duration-300"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <Icon className="w-4 h-4" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-            </div>
-            <p className="text-gray-400 text-sm">
-              © 2025 PortIQ. All rights reserved.
-            </p>
+            ))}
           </div>
         </div>
       </footer>

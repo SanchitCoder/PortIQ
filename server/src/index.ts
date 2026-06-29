@@ -1,0 +1,55 @@
+import { config } from 'dotenv';
+import path from 'path';
+import { createServer } from 'http';
+import { fileURLToPath } from 'url';
+import { createApp } from './app.js';
+import { runMigrations } from './db/migrate.js';
+import { connectRedis } from './lib/redis.js';
+import { getOpenRouterModel, isOpenRouterConfigured } from './lib/openrouter.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+config({ path: path.resolve(__dirname, '../../.env') });
+config();
+
+const PORT = Number(process.env.PORT ?? 3000);
+
+async function main() {
+  await connectRedis();
+  await runMigrations();
+
+  const app = createApp();
+  const server = createServer(app);
+
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(
+        `[portiq-server] Port ${PORT} is already in use. `
+        + `Stop the other process: lsof -ti :${PORT} | xargs kill`,
+      );
+      process.exit(1);
+    }
+    console.error('[portiq-server] server error:', err);
+    process.exit(1);
+  });
+
+  server.listen(PORT, () => {
+    console.log(`[portiq-server] listening on http://localhost:${PORT}`);
+    console.log(`[portiq-server] market provider: ${process.env.MARKET_DATA_PROVIDER ?? 'yahoo'}`);
+    console.log(`[portiq-server] OpenRouter: ${isOpenRouterConfigured() ? `enabled (${getOpenRouterModel()})` : 'disabled — using fallbacks'}`);
+    console.log('[portiq-server] shared state: Postgres + Redis (stateless web tier)');
+  });
+
+  // Let tsx watch / Ctrl+C release the port before the next restart
+  const shutdown = (signal: string) => {
+    console.log(`[portiq-server] ${signal} — shutting down`);
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 2000).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+main().catch(err => {
+  console.error('[portiq-server] failed to start:', err);
+  process.exit(1);
+});
