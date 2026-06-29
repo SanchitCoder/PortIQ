@@ -1,14 +1,13 @@
 import { config } from 'dotenv';
 import path from 'path';
 import { createServer } from 'http';
-import { fileURLToPath } from 'url';
 import { createApp } from './app.js';
 import { runMigrations } from './db/migrate.js';
 import { connectRedis } from './lib/redis.js';
 import { getOpenRouterModel, isOpenRouterConfigured } from './lib/openrouter.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-config({ path: path.resolve(__dirname, '../../.env') });
+config({ path: path.resolve(process.cwd(), '.env') });
+config({ path: path.resolve(process.cwd(), '../.env') });
 config();
 
 const PORT = Number(process.env.PORT ?? 3000);

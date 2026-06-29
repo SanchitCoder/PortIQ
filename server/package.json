@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/server/src/index.js",
     "worker": "tsx watch src/worker/index.ts",
-    "worker:start": "node dist/worker/index.js",
+    "worker:start": "node dist/server/src/worker/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -22,6 +22,7 @@
     "openai": "^4.77.0",
     "pdfkit": "^0.19.1",
     "pg": "^8.13.1",
+    "typescript": "^5.5.3",
     "yahoo-finance2": "^3.15.3",
     "zod": "^3.24.1"
   },
@@ -31,7 +32,6 @@
     "@types/node": "^22.10.5",
     "@types/pg": "^8.11.10",
     "tsx": "^4.19.2",
-    "typescript": "^5.5.3",
     "vitest": "^3.0.5"
   }
 }

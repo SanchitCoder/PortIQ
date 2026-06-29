@@ -1,0 +1,6 @@
+# Railway uses Nixpacks — ensure TypeScript is compiled before start.
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
