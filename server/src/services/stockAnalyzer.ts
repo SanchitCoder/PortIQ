@@ -74,6 +74,34 @@ async function fetchHistory(yahooSym: string, days: number): Promise<PriceHistor
   }
 }
 
+/** Yahoo quote/quoteSummary often fail from cloud hosts — derive spot from chart closes. */
+function priceFromHistory(points: PriceHistoryPoint[]): {
+  price: number;
+  dayChange: number;
+  dayChangePct: number;
+  week52Low: number;
+  week52High: number;
+} | null {
+  if (points.length === 0) return null;
+  const price = points[points.length - 1].close;
+  const prev = points.length > 1 ? points[points.length - 2].close : price;
+  const dayChange = price - prev;
+  const dayChangePct = prev > 0 ? (dayChange / prev) * 100 : 0;
+  let week52Low = price;
+  let week52High = price;
+  for (const p of points) {
+    week52Low = Math.min(week52Low, p.close);
+    week52High = Math.max(week52High, p.close);
+  }
+  return {
+    price,
+    dayChange: Math.round(dayChange * 100) / 100,
+    dayChangePct: Math.round(dayChangePct * 100) / 100,
+    week52Low,
+    week52High,
+  };
+}
+
 async function fetchNews(yahooSym: string): Promise<NewsHeadline[]> {
   try {
     const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(yahooSym)}&newsCount=6`;
@@ -168,22 +196,38 @@ export async function analyzeStock(
     fetchNews(yahooSym),
   ]);
 
-  const price = quote?.regularMarketPrice ?? summary?.price?.regularMarketPrice ?? null;
-  const dayChangePct = quote?.regularMarketChangePercent
-    ?? (summary?.price?.regularMarketChangePercent != null
-      ? Number(summary.price.regularMarketChangePercent) * 100
-      : null);
-  const dayChange = price != null && dayChangePct != null
-    ? price * (dayChangePct / 100) / (1 + dayChangePct / 100)
-    : quote?.regularMarketChange ?? null;
-
-  const currency = quote?.currency ?? summary?.price?.currency ?? (ex === 'NSE' || ex === 'BSE' ? 'INR' : 'USD');
-  const companyName = quote?.longName ?? quote?.shortName
-    ?? summary?.price?.longName ?? summary?.summaryProfile?.longName ?? sym;
+  const priceFromChart = priceFromHistory(hist1M.length > 0 ? hist1M : hist6M);
+  const rangeFromYear = priceFromHistory(hist1Y.length > 0 ? hist1Y : hist6M);
 
   const fin = summary?.financialData;
   const stats = summary?.defaultKeyStatistics;
   const detail = summary?.summaryDetail;
+
+  let price = quote?.regularMarketPrice ?? summary?.price?.regularMarketPrice ?? null;
+  let dayChangePct = quote?.regularMarketChangePercent
+    ?? (summary?.price?.regularMarketChangePercent != null
+      ? Number(summary.price.regularMarketChangePercent) * 100
+      : null);
+  let dayChange = price != null && dayChangePct != null
+    ? price * (dayChangePct / 100) / (1 + dayChangePct / 100)
+    : quote?.regularMarketChange ?? null;
+  let week52Low = quote?.fiftyTwoWeekLow ?? detail?.fiftyTwoWeekLow ?? null;
+  let week52High = quote?.fiftyTwoWeekHigh ?? detail?.fiftyTwoWeekHigh ?? null;
+
+  if (price == null && priceFromChart) {
+    price = priceFromChart.price;
+    dayChange = priceFromChart.dayChange;
+    dayChangePct = priceFromChart.dayChangePct;
+    console.warn(`[stockAnalyzer] ${sym}: using chart-derived price (Yahoo quote unavailable on this host)`);
+  }
+  if ((week52Low == null || week52High == null) && rangeFromYear) {
+    week52Low = week52Low ?? rangeFromYear.week52Low;
+    week52High = week52High ?? rangeFromYear.week52High;
+  }
+
+  const currency = quote?.currency ?? summary?.price?.currency ?? (ex === 'NSE' || ex === 'BSE' ? 'INR' : 'USD');
+  const companyName = quote?.longName ?? quote?.shortName
+    ?? summary?.price?.longName ?? summary?.summaryProfile?.longName ?? sym;
 
   const pe = stats?.trailingPE ?? detail?.trailingPE ?? null;
   const pb = stats?.priceToBook ?? null;
@@ -195,8 +239,6 @@ export async function analyzeStock(
   const profitMargin = fin?.profitMargins != null ? Number(fin.profitMargins) * 100 : null;
   const currentRatio = fin?.currentRatio ?? null;
   const marketCap = quote?.marketCap ?? detail?.marketCap ?? null;
-  const week52Low = quote?.fiftyTwoWeekLow ?? detail?.fiftyTwoWeekLow ?? null;
-  const week52High = quote?.fiftyTwoWeekHigh ?? detail?.fiftyTwoWeekHigh ?? null;
 
   const scorecard = buildScorecard(
     pe != null ? Number(pe) : null,
