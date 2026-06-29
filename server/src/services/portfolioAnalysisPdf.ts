@@ -1,5 +1,5 @@
 import PDFDocument from 'pdfkit';
-import type { PortfolioAnalysisResponse } from '../../../shared/api-types.js';
+import type { PortfolioAnalysisResponse } from '../../shared/api-types.js';
 
 const GOLD = '#9A7A2E';
 const GOLD_LIGHT = '#C9A84C';

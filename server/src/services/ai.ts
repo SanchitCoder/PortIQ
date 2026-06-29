@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { callOpenRouterChat, isRateLimitError, OpenRouterNotConfiguredError } from '../lib/openrouter.js';
 import { parseLlmJson, alignStringArray, coerceString, coerceStringArray } from '../lib/llmJson.js';
-import type { PortfolioActionPlanComputed } from '../../../shared/api-types.js';
+import type { PortfolioActionPlanComputed } from '../../shared/api-types.js';
 import type { RiskMetricsResult, StressTestResult, CorrelationClusterResult, PortfolioMetricsResult } from './compute.js';
 import { PORTFOLIO_ACTION_DISCLAIMER } from './portfolioActions.js';
 

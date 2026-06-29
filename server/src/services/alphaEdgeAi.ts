@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { AlphaEdgeAiRationale } from '../../../shared/api-types.js';
+import type { AlphaEdgeAiRationale } from '../../shared/api-types.js';
 import { parseLlmJson, alignStringArray, coerceString, coerceStringArray } from '../lib/llmJson.js';
 import { callOpenRouterChat, isRateLimitError, OpenRouterNotConfiguredError } from '../lib/openrouter.js';
 import type { AlphaEdgeComputed } from './alphaEdgeCompute.js';

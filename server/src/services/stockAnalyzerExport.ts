@@ -1,4 +1,4 @@
-import type { StockAnalysisResponse, StockAnalyzerRequest } from '../../../shared/api-types.js';
+import type { StockAnalysisResponse, StockAnalyzerRequest } from '../../shared/api-types.js';
 import { cacheGet, cacheKey, cacheSet, stableHash } from '../lib/cache.js';
 import { analyzeStock } from './stockAnalyzer.js';
 

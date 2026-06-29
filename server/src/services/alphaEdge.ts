@@ -2,7 +2,7 @@ import type {
   AlphaEdgeEvaluateRequest,
   AlphaEdgeReasoningFactor,
   AlphaEdgeVerdict,
-} from '../../../shared/api-types.js';
+} from '../../shared/api-types.js';
 import { getAnalyzerCompute } from './analyzerCompute.js';
 import { getFundamentals } from './fundamentals.js';
 import { getQuotes } from './marketData.js';

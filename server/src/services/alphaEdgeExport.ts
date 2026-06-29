@@ -1,7 +1,7 @@
 import type {
   AlphaEdgeEvaluateRequest,
   AlphaEdgeVerdict,
-} from '../../../shared/api-types.js';
+} from '../../shared/api-types.js';
 import { cacheGet, cacheKey, cacheSet, stableHash } from '../lib/cache.js';
 import { evaluateAlphaEdge } from './alphaEdge.js';
 

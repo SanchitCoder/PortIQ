@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { AlphaEdgeVerdict } from '../../../shared/api-types.js';
+import type { AlphaEdgeVerdict } from '../../shared/api-types.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
 import { evaluateAlphaEdge } from '../services/alphaEdge.js';
 import { alphaEdgeCacheKey, getVerdictForExport } from '../services/alphaEdgeExport.js';

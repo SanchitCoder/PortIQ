@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { StockAnalysisSynthesis } from '../../../shared/api-types.js';
+import type { StockAnalysisSynthesis } from '../../shared/api-types.js';
 import { parseLlmJson, coerceString, coerceStringArray } from '../lib/llmJson.js';
 import { callOpenRouterChat, isRateLimitError, OpenRouterNotConfiguredError } from '../lib/openrouter.js';
 

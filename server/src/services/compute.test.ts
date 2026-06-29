@@ -6,7 +6,7 @@ import {
   correlationClusters,
   enrichHoldings,
 } from './compute.js';
-import type { Holding } from '../../../shared/api-types.js';
+import type { Holding } from '../../shared/api-types.js';
 
 const sampleHoldings: Holding[] = [
   { id: '1', symbol: 'RELIANCE', exchange: 'NSE', quantity: 10, avgBuyPrice: 2500 },

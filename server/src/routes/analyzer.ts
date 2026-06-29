@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { StockAnalysisResponse } from '../../../shared/api-types.js';
+import type { StockAnalysisResponse } from '../../shared/api-types.js';
 import { cacheGet, cacheSet } from '../lib/cache.js';
 import { analyzeStock } from '../services/stockAnalyzer.js';
 import { generateStockAnalysisPdf } from '../services/stockAnalysisPdf.js';

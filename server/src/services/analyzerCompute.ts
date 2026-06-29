@@ -1,4 +1,4 @@
-import type { Exchange, StockAnalysisScorecard } from '../../../shared/api-types.js';
+import type { Exchange, StockAnalysisScorecard } from '../../shared/api-types.js';
 import { SECTOR_BENCHMARKS } from '../config/stockPeers.js';
 import { cacheGet, cacheKey, cacheSet } from '../lib/cache.js';
 import { clamp, inferExchange } from '../lib/symbolUtils.js';

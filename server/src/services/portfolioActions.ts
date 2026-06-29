@@ -3,7 +3,7 @@ import type {
   PortfolioActionPlanComputed,
   PortfolioActionPriority,
   PortfolioEstimatedImpact,
-} from '../../../shared/api-types.js';
+} from '../../shared/api-types.js';
 import type { PerHoldingMetrics, PortfolioMetricsResult, RiskMetricsResult } from './compute.js';
 
 export const PORTFOLIO_ACTION_DISCLAIMER =

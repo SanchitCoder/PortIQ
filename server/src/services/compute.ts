@@ -1,4 +1,4 @@
-import type { Exchange, Holding, NormalizedQuote, StressScenarioInput } from '../../../shared/api-types.js';
+import type { Exchange, Holding, NormalizedQuote, StressScenarioInput } from '../../shared/api-types.js';
 import { getSectorFactors, resolveSector } from '../config/sectorFactors.js';
 
 export interface HoldingWithQuote extends Holding {

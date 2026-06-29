@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { PriceQuote, PricesResponse } from '../../../shared/api-types.js';
+import type { PriceQuote, PricesResponse } from '../../shared/api-types.js';
 import { getQuotes } from '../services/marketData.js';
 import { resolveSector } from '../config/sectorFactors.js';
 

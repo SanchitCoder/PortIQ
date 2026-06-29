@@ -3,7 +3,7 @@ import type {
   AlphaEdgeFactorDirection,
   AlphaEdgeScenario,
   AlphaEdgeSignal,
-} from '../../../shared/api-types.js';
+} from '../../shared/api-types.js';
 import { clamp, clampRange } from '../lib/symbolUtils.js';
 import type { AnalyzerScores } from './analyzerCompute.js';
 import type { StockFundamentals } from './fundamentals.js';

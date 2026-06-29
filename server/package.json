@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "prebuild": "node scripts/sync-shared.mjs",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/server/src/index.js",
+    "start": "node dist/src/index.js",
     "worker": "tsx watch src/worker/index.ts",
-    "worker:start": "node dist/server/src/worker/index.js",
+    "worker:start": "node dist/src/worker/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

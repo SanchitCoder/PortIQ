@@ -1,5 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
-import type { Exchange, NormalizedQuote, SymbolRequest } from '../../../shared/api-types.js';
+import type { Exchange, NormalizedQuote, SymbolRequest } from '../../shared/api-types.js';
 import {
   cacheDelete,
   cacheKey,

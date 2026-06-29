@@ -1,5 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
-import type { Exchange } from '../../../shared/api-types.js';
+import type { Exchange } from '../../shared/api-types.js';
 import { resolveSector } from '../config/sectorFactors.js';
 import { cacheGet, cacheKey, cacheSet } from '../lib/cache.js';
 import { inferExchange, toYahooSymbol } from '../lib/symbolUtils.js';

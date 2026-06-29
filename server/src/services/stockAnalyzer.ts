@@ -7,7 +7,7 @@ import type {
   StockAnalysisResponse,
   StockMetricTile,
   FundamentalsGroup,
-} from '../../../shared/api-types.js';
+} from '../../shared/api-types.js';
 import { resolveSector } from '../config/sectorFactors.js';
 import { SECTOR_BENCHMARKS, SECTOR_PEERS } from '../config/stockPeers.js';
 import { inferExchange, toYahooSymbol } from '../lib/symbolUtils.js';

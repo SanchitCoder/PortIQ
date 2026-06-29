@@ -1,4 +1,4 @@
-import type { Exchange } from '../../../shared/api-types.js';
+import type { Exchange } from '../../shared/api-types.js';
 
 const US_SYMBOLS = new Set(['AAPL', 'MSFT', 'NVDA', 'TSLA', 'GOOGL', 'AMZN', 'META']);
 

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { DEMO_USER_ID } from '../../../shared/constants.js';
-import type { AddHoldingInput, Holding, UpdateHoldingInput } from '../../../shared/api-types.js';
+import { DEMO_USER_ID } from '../../shared/constants.js';
+import type { AddHoldingInput, Holding, UpdateHoldingInput } from '../../shared/api-types.js';
 import { query } from './pg.js';
 
 interface HoldingRow {

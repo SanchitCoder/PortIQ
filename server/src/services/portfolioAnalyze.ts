@@ -1,4 +1,4 @@
-import type { Holding, PortfolioAnalysisResponse } from '../../../shared/api-types.js';
+import type { Holding, PortfolioAnalysisResponse } from '../../shared/api-types.js';
 import { cacheGet, cacheKey, cacheSet, stableHash } from '../lib/cache.js';
 import { getQuotes } from './marketData.js';
 import {
