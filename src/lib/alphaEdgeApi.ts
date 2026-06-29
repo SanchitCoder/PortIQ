@@ -1,12 +1,11 @@
 import type { AlphaEdgeEvaluateRequest, AlphaEdgeVerdict } from '../../shared/api-types';
-
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { apiUrl } from './apiBase';
 
 /** API: POST /api/alphaedge/evaluate/export-pdf — cached verdict PDF (no extra AI call) */
 export async function exportAlphaEdgePdf(
   body: AlphaEdgeEvaluateRequest & { userEmail?: string },
 ): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/api/alphaedge/evaluate/export-pdf`, {
+  const res = await fetch(apiUrl('/api/alphaedge/evaluate/export-pdf'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -20,7 +19,7 @@ export async function exportAlphaEdgePdf(
 
 /** API: POST /api/alphaedge/evaluate */
 export async function evaluateAlphaEdge(body: AlphaEdgeEvaluateRequest): Promise<AlphaEdgeVerdict> {
-  const res = await fetch(`${API_BASE}/api/alphaedge/evaluate`, {
+  const res = await fetch(apiUrl('/api/alphaedge/evaluate'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

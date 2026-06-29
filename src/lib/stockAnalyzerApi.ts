@@ -1,12 +1,11 @@
 import type { StockAnalysisResponse, StockAnalyzerRequest } from '../../shared/api-types';
-
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { apiUrl } from './apiBase';
 
 /** API: POST /api/analyzer/stock/export-pdf — cached report PDF (no extra AI call) */
 export async function exportStockAnalysisPdf(
   body: StockAnalyzerRequest & { userEmail?: string },
 ): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/api/analyzer/stock/export-pdf`, {
+  const res = await fetch(apiUrl('/api/analyzer/stock/export-pdf'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -22,7 +21,7 @@ export async function exportStockAnalysisPdf(
 export async function analyzeStock(
   body: StockAnalyzerRequest,
 ): Promise<StockAnalysisResponse> {
-  const res = await fetch(`${API_BASE}/api/analyzer/stock`, {
+  const res = await fetch(apiUrl('/api/analyzer/stock'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

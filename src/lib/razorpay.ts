@@ -1,4 +1,6 @@
 // Razorpay Payment Integration
+import { apiUrl } from './apiBase';
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -93,7 +95,7 @@ export const createRazorpayOrder = async (
   // Call your backend API to create order
   // For now, we'll use Razorpay client-side integration
   // In production, you should create orders server-side for security
-  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/create-order`, {
+  const response = await fetch(apiUrl('/api/create-order'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -159,7 +161,7 @@ export const initializeRazorpay = async (
         try {
           // Verify payment on backend
           const verifyResponse = await fetch(
-            `${import.meta.env.VITE_API_URL || ''}/api/verify-payment`,
+            apiUrl('/api/verify-payment'),
             {
               method: 'POST',
               headers: {

@@ -7,11 +7,24 @@ import { stressTestRouter } from './routes/stressTest.js';
 import { analyzerRouter } from './routes/analyzer.js';
 import { alphaEdgeRouter } from './routes/alphaEdge.js';
 
+function parseCorsOrigins(): string[] {
+  const raw = process.env.CORS_ORIGIN?.trim();
+  if (raw) {
+    return raw.split(',').map(origin => origin.trim()).filter(Boolean);
+  }
+  return ['http://localhost:5173', 'http://localhost:5174'];
+}
+
+export function getCorsOrigins(): string[] {
+  return parseCorsOrigins();
+}
+
 export function createApp() {
   const app = express();
+  const corsOrigins = parseCorsOrigins();
 
   app.use(cors({
-    origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:5173', 'http://localhost:5174'],
+    origin: corsOrigins,
     credentials: true,
   }));
   app.use(express.json());

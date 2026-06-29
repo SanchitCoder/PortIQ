@@ -6,11 +6,10 @@ import type {
   StressTestRequest,
   StressTestResponse,
 } from '../../shared/api-types';
-
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { apiUrl } from './apiBase';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(apiUrl(path), {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   });
@@ -65,7 +64,7 @@ export async function exportPortfolioPdf(
   holdings: Holding[],
   userEmail?: string,
 ): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/api/portfolio/analyze/export-pdf`, {
+  const res = await fetch(apiUrl('/api/portfolio/analyze/export-pdf'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ holdings, userEmail }),

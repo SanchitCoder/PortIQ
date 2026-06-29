@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import path from 'path';
 import { createServer } from 'http';
-import { createApp } from './app.js';
+import { createApp, getCorsOrigins } from './app.js';
 import { runMigrations } from './db/migrate.js';
 import { connectRedis, isRedisConfigured } from './lib/redis.js';
 import { getOpenRouterModel, isOpenRouterConfigured } from './lib/openrouter.js';
@@ -38,6 +38,7 @@ async function main() {
     console.log(
       `[portiq-server] cache: ${isRedisConfigured() ? 'Redis' : 'in-memory (set UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN for production)'}`,
     );
+    console.log(`[portiq-server] CORS origins: ${getCorsOrigins().join(', ')}`);
   });
 
   // Let tsx watch / Ctrl+C release the port before the next restart
