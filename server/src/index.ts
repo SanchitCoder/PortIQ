@@ -11,6 +11,7 @@ config({ path: path.resolve(process.cwd(), '../.env') });
 config();
 
 const PORT = Number(process.env.PORT ?? 3000);
+const HOST = '0.0.0.0';
 
 async function main() {
   await connectRedis();
@@ -31,8 +32,8 @@ async function main() {
     process.exit(1);
   });
 
-  server.listen(PORT, () => {
-    console.log(`[portiq-server] listening on http://localhost:${PORT}`);
+  server.listen(PORT, HOST, () => {
+    console.log(`[portiq-server] listening on http://${HOST}:${PORT}`);
     console.log(`[portiq-server] market provider: ${process.env.MARKET_DATA_PROVIDER ?? 'yahoo'}`);
     console.log(`[portiq-server] OpenRouter: ${isOpenRouterConfigured() ? `enabled (${getOpenRouterModel()})` : 'disabled — using fallbacks'}`);
     console.log(
@@ -41,7 +42,6 @@ async function main() {
     console.log(`[portiq-server] CORS origins: ${getCorsOrigins().join(', ')}`);
   });
 
-  // Let tsx watch / Ctrl+C release the port before the next restart
   const shutdown = (signal: string) => {
     console.log(`[portiq-server] ${signal} — shutting down`);
     server.close(() => process.exit(0));

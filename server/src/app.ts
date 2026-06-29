@@ -33,6 +33,10 @@ export function createApp() {
     res.json({ status: 'ok', service: 'portiq-api' });
   });
 
+  app.get('/', (_req, res) => {
+    res.json({ status: 'ok', service: 'portiq-api', health: '/health' });
+  });
+
   // Mount analyze before /api/portfolio/:id to avoid route shadowing
   app.use('/api/portfolio/analyze', analyzeRouter);
   app.use('/api/portfolio', portfolioRouter);
