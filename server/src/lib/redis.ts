@@ -7,6 +7,14 @@ import { Redis, RedisOptions } from 'ioredis';
  */
 let redis: Redis | null = null;
 
+export function isRedisConfigured(): boolean {
+  if (process.env.REDIS_URL?.trim()) return true;
+  return Boolean(
+    process.env.UPSTASH_REDIS_REST_URL?.trim()
+    && process.env.UPSTASH_REDIS_REST_TOKEN?.trim(),
+  );
+}
+
 /** Build rediss:// URL from Upstash REST credentials (ioredis / BullMQ use TCP, not REST). */
 export function resolveRedisUrl(): string {
   if (process.env.REDIS_URL && !process.env.REDIS_URL.includes('localhost')) {
@@ -44,6 +52,9 @@ function parseRedisUrl(url: string): RedisOptions {
 }
 
 export function getRedis(): Redis {
+  if (!isRedisConfigured()) {
+    throw new Error('Redis is not configured');
+  }
   if (!redis) {
     redis = new Redis(parseRedisUrl(resolveRedisUrl()));
   }
@@ -59,7 +70,15 @@ export function getBullmqConnection(): ConnectionOptions {
 }
 
 export async function connectRedis(): Promise<void> {
+  if (!isRedisConfigured()) {
+    console.warn(
+      '[portiq-server] Redis not configured — using in-memory cache and rate limits. '
+      + 'Set REDIS_URL or UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN on Railway for production.',
+    );
+    return;
+  }
   await getRedis().ping();
+  console.log('[portiq-server] Redis connected');
 }
 
 export async function disconnectRedis(): Promise<void> {

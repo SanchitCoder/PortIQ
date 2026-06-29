@@ -1,8 +1,8 @@
-import { getRedis } from './redis.js';
+import { memoryRateLimit } from './memoryCache.js';
+import { getRedis, isRedisConfigured } from './redis.js';
 
 /**
- * Redis-backed fixed-window rate limiter — shared across all web + worker instances.
- * Replaces per-process counters and BullMQ RateLimiterRedis (removed in BullMQ v5).
+ * Fixed-window rate limiter — Redis when configured, otherwise in-process memory.
  */
 export async function consumeGlobalRateLimit(
   keyPrefix: string,
@@ -11,6 +11,12 @@ export async function consumeGlobalRateLimit(
 ): Promise<void> {
   const windowId = Math.floor(Date.now() / (windowSec * 1000));
   const key = `${keyPrefix}:${windowId}`;
+
+  if (!isRedisConfigured()) {
+    memoryRateLimit(key, limit, windowSec);
+    return;
+  }
+
   const redis = getRedis();
   const count = await redis.incr(key);
   if (count === 1) {

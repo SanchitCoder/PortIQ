@@ -5,8 +5,21 @@ import { query } from './pg.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function resolveMigrationsDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), 'migrations'),
+    path.resolve(__dirname, '../../../migrations'),
+  ];
+  for (const dir of candidates) {
+    if (fs.existsSync(dir)) return dir;
+  }
+  throw new Error(
+    `[migrate] migrations folder not found (checked: ${candidates.join(', ')})`,
+  );
+}
+
 export async function runMigrations(): Promise<void> {
-  const migrationsDir = path.join(__dirname, '../../migrations');
+  const migrationsDir = resolveMigrationsDir();
   const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
 
   await query(`
