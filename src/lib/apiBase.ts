@@ -1,7 +1,16 @@
-/** Normalized API origin — strips trailing slashes so paths like `/api/...` join cleanly. */
+/** Normalize API origin — must be absolute (https://...) or browser POSTs to Vercel → 405. */
 export function getApiBase(): string {
-  const raw = import.meta.env.VITE_API_URL?.trim() ?? '';
-  return raw.replace(/\/+$/, '');
+  let raw = import.meta.env.VITE_API_URL?.trim() ?? '';
+  raw = raw.replace(/\/+$/, '');
+
+  if (!raw) return '';
+
+  // e.g. portiq-production.up.railway.app → https://portiq-production.up.railway.app
+  if (!/^https?:\/\//i.test(raw)) {
+    raw = `https://${raw.replace(/^\/+/, '')}`;
+  }
+
+  return raw;
 }
 
 export function apiUrl(path: string): string {

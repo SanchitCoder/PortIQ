@@ -1,6 +1,10 @@
 import YahooFinance from 'yahoo-finance2';
 import type { Exchange, NormalizedQuote, SymbolRequest } from '../../shared/api-types.js';
 import {
+  fetchFmpQuotes,
+  matchFmpQuote,
+} from '../lib/fmp.js';
+import {
   cacheDelete,
   cacheKey,
   cacheMget,
@@ -199,27 +203,26 @@ async function fetchTwelveData(symbols: SymbolRequest[]): Promise<NormalizedQuot
 }
 
 async function fetchFmp(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
-  const apiKey = process.env.FMP_API_KEY;
-  if (!apiKey) throw new Error('FMP_API_KEY not set');
+  const rows = await fetchFmpQuotes(symbols);
+  const results: NormalizedQuote[] = [];
 
-  const fmpSymbols = symbols.map(s => providerSymbol(s.symbol, s.exchange, 'fmp')).join(',');
-  const url = `https://financialmodelingprep.com/api/v3/quote/${encodeURIComponent(fmpSymbols)}?apikey=${apiKey}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`FMP HTTP ${res.status}`);
-  const data = await res.json() as Array<Record<string, number | string>>;
-
-  return symbols.map(s => {
-    const fmpSym = providerSymbol(s.symbol, s.exchange, 'fmp');
-    const row = data.find(r => r.symbol === fmpSym) ?? data.find(r => String(r.symbol).includes(s.symbol));
-    if (!row) throw new Error(`No quote for ${fmpSym}`);
-    return {
+  for (const s of symbols) {
+    const row = matchFmpQuote(rows, s.symbol, s.exchange);
+    if (!row?.price) {
+      console.warn(`[marketData/fmp] no quote for ${s.symbol}.${s.exchange}`);
+      continue;
+    }
+    results.push({
       symbol: s.symbol.toUpperCase(),
       exchange: s.exchange,
-      price: Number(row.price ?? 0),
-      dayChangePct: Number(row.changesPercentage ?? 0),
+      price: Number(row.price),
+      dayChangePct: Math.round(Number(row.changesPercentage ?? 0) * 100) / 100,
       currency: currencyForExchange(s.exchange),
-    };
-  });
+    });
+  }
+
+  if (results.length === 0) throw new Error('FMP returned no quotes');
+  return results;
 }
 
 async function fetchAlphaVantage(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
@@ -379,7 +382,7 @@ export async function getQuotes(
       fetched = await provider.getQuotes(toFetch);
     } catch (err) {
       console.warn(`[marketData] ${provider.name} failure:`, err instanceof Error ? err.message : err);
-      if (provider.name !== 'yahoo') {
+      if (provider.name !== 'yahoo' && provider.name !== 'fmp') {
         try {
           fetched = await fetchYahoo(toFetch);
         } catch (yahooErr) {
