@@ -23,6 +23,10 @@ export function fmpApiKey(): string {
   return key;
 }
 
+function isFmpErrorPayload(data: unknown): data is { 'Error Message': string } {
+  return Boolean(data && typeof data === 'object' && 'Error Message' in data);
+}
+
 export async function fmpFetch<T>(path: string): Promise<T> {
   const sep = path.includes('?') ? '&' : '?';
   const url = `${FMP_BASE}${path}${sep}apikey=${fmpApiKey()}`;
@@ -31,10 +35,20 @@ export async function fmpFetch<T>(path: string): Promise<T> {
     throw new Error(`FMP HTTP ${res.status} for ${path.split('?')[0]}`);
   }
   const data = await res.json() as T | { 'Error Message'?: string };
-  if (data && typeof data === 'object' && 'Error Message' in data) {
-    throw new Error(String((data as { 'Error Message': string })['Error Message']));
+  if (isFmpErrorPayload(data)) {
+    throw new Error(data['Error Message']);
   }
   return data as T;
+}
+
+/** Like fmpFetch but returns null instead of throwing — for optional data. */
+export async function fmpFetchSafe<T>(path: string): Promise<T | null> {
+  try {
+    return await fmpFetch<T>(path);
+  } catch (err) {
+    console.warn(`[fmp] ${path.split('?')[0]}:`, err instanceof Error ? err.message : err);
+    return null;
+  }
 }
 
 export interface FmpQuoteRow {
@@ -78,7 +92,7 @@ export interface FmpHistoricalDay {
   close: number;
 }
 
-/** Batch quote — one API call for many symbols (comma-separated). */
+/** Batch quote — comma-separated symbols must NOT be URL-encoded as a whole. */
 export async function fetchFmpQuotes(
   symbols: { symbol: string; exchange: Exchange }[],
 ): Promise<FmpQuoteRow[]> {
@@ -90,8 +104,22 @@ export async function fetchFmpQuotes(
   for (let i = 0; i < symbols.length; i += CHUNK) {
     const chunk = symbols.slice(i, i + CHUNK);
     const fmpSymbols = chunk.map(s => toFmpSymbol(s.symbol, s.exchange)).join(',');
-    const data = await fmpFetch<FmpQuoteRow[]>(`/quote/${encodeURIComponent(fmpSymbols)}`);
-    if (Array.isArray(data)) rows.push(...data);
+
+    try {
+      const data = await fmpFetch<FmpQuoteRow[] | { 'Error Message': string }>(`/quote/${fmpSymbols}`);
+      if (Array.isArray(data)) {
+        rows.push(...data);
+        continue;
+      }
+    } catch (err) {
+      console.warn('[fmp] batch quote failed, trying per-symbol:', err instanceof Error ? err.message : err);
+    }
+
+    for (const s of chunk) {
+      const sym = toFmpSymbol(s.symbol, s.exchange);
+      const one = await fmpFetchSafe<FmpQuoteRow[]>(`/quote/${sym}`);
+      if (Array.isArray(one) && one.length > 0) rows.push(...one);
+    }
   }
 
   return rows;
@@ -118,26 +146,22 @@ export async function fetchFmpQuoteForSymbol(
 
 export async function fetchFmpProfile(symbol: string, exchange: Exchange): Promise<FmpProfileRow | null> {
   const fmpSym = toFmpSymbol(symbol, exchange);
-  const data = await fmpFetch<FmpProfileRow[]>(`/profile/${encodeURIComponent(fmpSym)}`);
+  const data = await fmpFetchSafe<FmpProfileRow[]>(`/profile/${fmpSym}`);
   return Array.isArray(data) && data.length > 0 ? data[0] : null;
 }
 
 export async function fetchFmpRatiosTtm(symbol: string, exchange: Exchange): Promise<FmpRatiosTtmRow | null> {
   const fmpSym = toFmpSymbol(symbol, exchange);
-  const data = await fmpFetch<FmpRatiosTtmRow[]>(`/ratios-ttm/${encodeURIComponent(fmpSym)}`);
+  const data = await fmpFetchSafe<FmpRatiosTtmRow[]>(`/ratios-ttm/${fmpSym}`);
   return Array.isArray(data) && data.length > 0 ? data[0] : null;
 }
 
 export async function fetchFmpIncomeGrowth(symbol: string, exchange: Exchange): Promise<FmpGrowthRow | null> {
   const fmpSym = toFmpSymbol(symbol, exchange);
-  try {
-    const data = await fmpFetch<Array<{ revenueGrowth?: number }>>(
-      `/income-statement-growth/${encodeURIComponent(fmpSym)}?limit=1`,
-    );
-    return Array.isArray(data) && data.length > 0 ? data[0] : null;
-  } catch {
-    return null;
-  }
+  const data = await fmpFetchSafe<Array<{ revenueGrowth?: number }>>(
+    `/income-statement-growth/${fmpSym}?limit=1`,
+  );
+  return Array.isArray(data) && data.length > 0 ? data[0] : null;
 }
 
 export async function fetchFmpHistorical(
@@ -153,11 +177,11 @@ export async function fetchFmpHistorical(
   const from = period1.toISOString().slice(0, 10);
   const to = period2.toISOString().slice(0, 10);
 
-  const data = await fmpFetch<{ historical?: FmpHistoricalDay[] }>(
-    `/historical-price-full/${encodeURIComponent(fmpSym)}?from=${from}&to=${to}`,
+  const data = await fmpFetchSafe<{ historical?: FmpHistoricalDay[] }>(
+    `/historical-price-full/${fmpSym}?from=${from}&to=${to}`,
   );
 
-  const historical = data.historical ?? [];
+  const historical = data?.historical ?? [];
   return historical
     .filter(h => h.close != null)
     .map(h => ({ date: h.date, close: Number(h.close) }))
@@ -173,12 +197,8 @@ export interface FmpNewsRow {
 
 export async function fetchFmpNews(symbol: string, exchange: Exchange, limit = 6): Promise<FmpNewsRow[]> {
   const fmpSym = toFmpSymbol(symbol, exchange);
-  try {
-    const data = await fmpFetch<FmpNewsRow[]>(
-      `/stock_news?tickers=${encodeURIComponent(fmpSym)}&limit=${limit}`,
-    );
-    return Array.isArray(data) ? data.slice(0, limit) : [];
-  } catch {
-    return [];
-  }
+  const data = await fmpFetchSafe<FmpNewsRow[]>(
+    `/stock_news?tickers=${encodeURIComponent(fmpSym)}&limit=${limit}`,
+  );
+  return Array.isArray(data) ? data.slice(0, limit) : [];
 }

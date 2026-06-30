@@ -11,6 +11,7 @@ import {
   cacheMget,
   cacheMset,
 } from '../lib/redisCache.js';
+import { chartMetaPrice, chartToHistory, fetchYahooChart } from '../lib/yahooChart.js';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
@@ -99,8 +100,8 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/** Yahoo Finance via yahoo-finance2 — batch first, per-symbol fallback on partial/empty. */
-async function fetchYahoo(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
+/** Yahoo Finance via yahoo-finance2 quote() — often blocked on cloud hosts; local fallback. */
+async function fetchYahooQuotes(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
   const results: NormalizedQuote[] = [];
   const seen = new Set<string>();
 
@@ -135,8 +136,104 @@ async function fetchYahoo(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> 
     if (missing.length > 1) await sleep(yahooFetchDelayMs);
   }
 
+  return results;
+}
+
+/**
+ * Yahoo market data — chart API first (works on Railway), quote() fallback for local dev.
+ */
+async function fetchYahoo(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
+  const results: NormalizedQuote[] = [];
+  const seen = new Set<string>();
+
+  try {
+    const chartQuotes = await fetchYahooChartQuotes(symbols);
+    for (const q of chartQuotes) {
+      const key = symbolKey(q.symbol, q.exchange);
+      if (!seen.has(key)) {
+        seen.add(key);
+        results.push(q);
+      }
+    }
+  } catch (err) {
+    console.warn('[marketData/yahoo] chart API failed:', err instanceof Error ? err.message : err);
+  }
+
+  const missing = symbols.filter(s => !seen.has(symbolKey(s.symbol, s.exchange)));
+  if (missing.length > 0) {
+    const quoteQuotes = await fetchYahooQuotes(missing);
+    for (const q of quoteQuotes) {
+      const key = symbolKey(q.symbol, q.exchange);
+      if (!seen.has(key)) {
+        seen.add(key);
+        results.push(q);
+      }
+    }
+  }
+
   if (results.length === 0) throw new Error('Yahoo Finance returned no quotes');
   return results;
+}
+
+/** Yahoo v8 chart API — works on cloud hosts when yahoo-finance2 quote() is blocked. */
+async function fetchYahooChartQuotes(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
+  const results: NormalizedQuote[] = [];
+
+  for (const s of symbols) {
+    try {
+      const chart = await fetchYahooChart(s.symbol, s.exchange, '1mo');
+      if (!chart?.result?.length) continue;
+
+      const meta = chartMetaPrice(chart);
+      let price = meta.price;
+      let dayChangePct = meta.dayChangePct ?? 0;
+
+      if (price == null) {
+        const hist = chartToHistory(chart);
+        if (hist.length > 0) {
+          const last = hist[hist.length - 1];
+          const prev = hist.length > 1 ? hist[hist.length - 2] : last;
+          price = last.close;
+          dayChangePct = prev.close > 0 ? ((price - prev.close) / prev.close) * 100 : 0;
+        }
+      }
+
+      if (price == null) continue;
+
+      results.push({
+        symbol: s.symbol.toUpperCase(),
+        exchange: s.exchange,
+        price,
+        dayChangePct: Math.round(dayChangePct * 100) / 100,
+        currency: currencyForExchange(s.exchange),
+      });
+    } catch {
+      // try next symbol
+    }
+    if (symbols.length > 1) await sleep(yahooFetchDelayMs);
+  }
+
+  if (results.length === 0) throw new Error('Yahoo chart returned no quotes');
+  return results;
+}
+
+async function fillMissingQuotes(
+  missing: SymbolRequest[],
+): Promise<NormalizedQuote[]> {
+  if (missing.length === 0) return [];
+
+  try {
+    return await fetchYahooChartQuotes(missing);
+  } catch (chartErr) {
+    console.warn('[marketData] Yahoo chart fallback:', chartErr instanceof Error ? chartErr.message : chartErr);
+  }
+
+  try {
+    return await fetchYahoo(missing);
+  } catch (yahooErr) {
+    console.warn('[marketData] Yahoo quote fallback:', yahooErr instanceof Error ? yahooErr.message : yahooErr);
+    return [];
+  }
 }
 
 async function fetchTwelveDataBatch(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
@@ -387,17 +484,13 @@ export async function getQuotes(
     let fetchedKeys = new Set(fetched.map(q => symbolKey(q.symbol, q.exchange)));
     const missingAfterPrimary = toFetch.filter(s => !fetchedKeys.has(symbolKey(s.symbol, s.exchange)));
 
-    // FMP/Twelve Data often miss NSE symbols — fill gaps with Yahoo when possible
-    if (missingAfterPrimary.length > 0 && provider.name !== 'yahoo') {
-      try {
-        const yahooFilled = await fetchYahoo(missingAfterPrimary);
-        if (yahooFilled.length > 0) {
-          console.log(`[marketData] Yahoo filled ${yahooFilled.length}/${missingAfterPrimary.length} missing quotes`);
-          fetched = [...fetched, ...yahooFilled];
-          fetchedKeys = new Set(fetched.map(q => symbolKey(q.symbol, q.exchange)));
-        }
-      } catch (yahooErr) {
-        console.warn('[marketData] Yahoo fallback failed:', yahooErr instanceof Error ? yahooErr.message : yahooErr);
+    // Fill gaps with Yahoo chart API when primary provider misses symbols (or partially fails)
+    if (missingAfterPrimary.length > 0) {
+      const yahooFilled = await fillMissingQuotes(missingAfterPrimary);
+      if (yahooFilled.length > 0) {
+        console.log(`[marketData] Yahoo filled ${yahooFilled.length}/${missingAfterPrimary.length} missing quotes`);
+        fetched = [...fetched, ...yahooFilled];
+        fetchedKeys = new Set(fetched.map(q => symbolKey(q.symbol, q.exchange)));
       }
     }
 

@@ -17,6 +17,7 @@ import {
   fetchFmpRatiosTtm,
   isFmpProvider,
 } from '../lib/fmp.js';
+import { chartMetaPrice, chartToHistory, fetchYahooChart } from '../lib/yahooChart.js';
 import { inferExchange, toYahooSymbol } from '../lib/symbolUtils.js';
 import { buildScorecard } from './analyzerCompute.js';
 import { getFundamentals } from './fundamentals.js';
@@ -162,6 +163,15 @@ async function fetchPeerMetricsFmp(
   }));
 }
 
+async function yahooChartHistory(
+  sym: string,
+  ex: Exchange,
+  range: '1mo' | '6mo' | '1y',
+): Promise<PriceHistoryPoint[]> {
+  const chart = await fetchYahooChart(sym, ex, range);
+  return chart ? chartToHistory(chart) : [];
+}
+
 async function analyzeStockFmp(
   sym: string,
   ex: Exchange,
@@ -169,15 +179,22 @@ async function analyzeStockFmp(
 ): Promise<StockAnalysisResponse> {
   const sector = resolveSector(sym);
 
-  const [fundamentals, quote, ratios, hist1M, hist6M, hist1Y, newsRows] = await Promise.all([
+  const [fundamentals, quote, ratios, hist1MRaw, hist6MRaw, hist1YRaw, newsRows] = await Promise.all([
     getFundamentals(sym, ex),
-    fetchFmpQuoteForSymbol(sym, ex),
-    fetchFmpRatiosTtm(sym, ex),
-    fetchFmpHistorical(sym, ex, 31),
-    fetchFmpHistorical(sym, ex, 183),
-    fetchFmpHistorical(sym, ex, 366),
-    fetchFmpNews(sym, ex, 6),
+    fetchFmpQuoteForSymbol(sym, ex).catch(() => null),
+    fetchFmpRatiosTtm(sym, ex).catch(() => null),
+    fetchFmpHistorical(sym, ex, 31).catch(() => [] as PriceHistoryPoint[]),
+    fetchFmpHistorical(sym, ex, 183).catch(() => [] as PriceHistoryPoint[]),
+    fetchFmpHistorical(sym, ex, 366).catch(() => [] as PriceHistoryPoint[]),
+    fetchFmpNews(sym, ex, 6).catch(() => []),
   ]);
+
+  let hist1M = hist1MRaw;
+  let hist6M = hist6MRaw;
+  let hist1Y = hist1YRaw;
+  if (hist1M.length === 0) hist1M = await yahooChartHistory(sym, ex, '1mo');
+  if (hist6M.length === 0) hist6M = await yahooChartHistory(sym, ex, '6mo');
+  if (hist1Y.length === 0) hist1Y = await yahooChartHistory(sym, ex, '1y');
 
   const priceFromChart = priceFromHistory(hist1M.length > 0 ? hist1M : hist6M);
   const rangeFromYear = priceFromHistory(hist1Y.length > 0 ? hist1Y : hist6M);
@@ -192,6 +209,16 @@ async function analyzeStockFmp(
     price = priceFromChart.price;
     dayChange = priceFromChart.dayChange;
     dayChangePct = priceFromChart.dayChangePct;
+  } else if (price == null) {
+    const chart = await fetchYahooChart(sym, ex, '1mo');
+    if (chart) {
+      const meta = chartMetaPrice(chart);
+      price = meta.price;
+      dayChange = meta.dayChange;
+      dayChangePct = meta.dayChangePct;
+      week52Low = week52Low ?? meta.week52Low;
+      week52High = week52High ?? meta.week52High;
+    }
   }
   if ((week52Low == null || week52High == null) && rangeFromYear) {
     week52Low = week52Low ?? rangeFromYear.week52Low;
@@ -269,28 +296,6 @@ async function analyzeStockFmp(
   };
 }
 
-async function fetchHistoryYahoo(yahooSym: string, days: number): Promise<PriceHistoryPoint[]> {
-  const period2 = new Date();
-  const period1 = new Date();
-  period1.setDate(period1.getDate() - days);
-  try {
-    const chart = await yahooFinance.chart(yahooSym, {
-      period1: period1.toISOString().slice(0, 10),
-      period2: period2.toISOString().slice(0, 10),
-      interval: '1d',
-    });
-    const quotes = chart.quotes ?? [];
-    return quotes
-      .filter(q => q.close != null)
-      .map(q => ({
-        date: q.date.toISOString().slice(0, 10),
-        close: q.close as number,
-      }));
-  } catch {
-    return [];
-  }
-}
-
 async function fetchNewsYahoo(yahooSym: string): Promise<NewsHeadline[]> {
   try {
     const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(yahooSym)}&newsCount=6`;
@@ -365,34 +370,24 @@ async function analyzeStockYahoo(
   const yahooSym = toYahooSymbol(sym, ex);
   const sector = resolveSector(sym);
 
-  const [quote, summary, hist1M, hist6M, hist1Y, news] = await Promise.all([
-    yahooFinance.quote(yahooSym).catch(() => null),
-    yahooFinance.quoteSummary(yahooSym, {
-      modules: ['price', 'summaryDetail', 'defaultKeyStatistics', 'financialData', 'summaryProfile'],
-    }).catch(() => null),
-    fetchHistoryYahoo(yahooSym, 31),
-    fetchHistoryYahoo(yahooSym, 183),
-    fetchHistoryYahoo(yahooSym, 366),
+  const [fundamentals, hist1M, hist6M, hist1Y, news, chart] = await Promise.all([
+    getFundamentals(sym, ex),
+    yahooChartHistory(sym, ex, '1mo'),
+    yahooChartHistory(sym, ex, '6mo'),
+    yahooChartHistory(sym, ex, '1y'),
     fetchNewsYahoo(yahooSym),
+    fetchYahooChart(sym, ex, '1mo'),
   ]);
 
+  const meta = chart ? chartMetaPrice(chart) : null;
   const priceFromChart = priceFromHistory(hist1M.length > 0 ? hist1M : hist6M);
   const rangeFromYear = priceFromHistory(hist1Y.length > 0 ? hist1Y : hist6M);
 
-  const fin = summary?.financialData;
-  const stats = summary?.defaultKeyStatistics;
-  const detail = summary?.summaryDetail;
-
-  let price = quote?.regularMarketPrice ?? summary?.price?.regularMarketPrice ?? null;
-  let dayChangePct = quote?.regularMarketChangePercent
-    ?? (summary?.price?.regularMarketChangePercent != null
-      ? Number(summary.price.regularMarketChangePercent) * 100
-      : null);
-  let dayChange = price != null && dayChangePct != null
-    ? price * (dayChangePct / 100) / (1 + dayChangePct / 100)
-    : quote?.regularMarketChange ?? null;
-  let week52Low = quote?.fiftyTwoWeekLow ?? detail?.fiftyTwoWeekLow ?? null;
-  let week52High = quote?.fiftyTwoWeekHigh ?? detail?.fiftyTwoWeekHigh ?? null;
+  let price = meta?.price ?? null;
+  let dayChangePct = meta?.dayChangePct ?? null;
+  let dayChange = meta?.dayChange ?? null;
+  let week52Low = meta?.week52Low ?? null;
+  let week52High = meta?.week52High ?? null;
 
   if (price == null && priceFromChart) {
     price = priceFromChart.price;
@@ -404,43 +399,44 @@ async function analyzeStockYahoo(
     week52High = week52High ?? rangeFromYear.week52High;
   }
 
-  const currency = quote?.currency ?? summary?.price?.currency ?? (ex === 'NSE' || ex === 'BSE' ? 'INR' : 'USD');
-  const companyName = quote?.longName ?? quote?.shortName
-    ?? summary?.price?.longName ?? summary?.summaryProfile?.longName ?? sym;
+  const currency = fundamentals.currency ?? meta?.currency ?? (ex === 'NSE' || ex === 'BSE' ? 'INR' : 'USD');
+  const companyName = fundamentals.companyName !== sym
+    ? fundamentals.companyName
+    : (meta?.companyName ?? sym);
 
-  const pe = stats?.trailingPE ?? detail?.trailingPE ?? null;
-  const pb = stats?.priceToBook ?? null;
-  const eps = stats?.trailingEps ?? null;
-  const divYield = detail?.dividendYield != null ? Number(detail.dividendYield) * 100 : null;
-  const roe = fin?.returnOnEquity != null ? Number(fin.returnOnEquity) * 100 : null;
-  const debtEquity = fin?.debtToEquity != null ? Number(fin.debtToEquity) / 100 : null;
-  const revenueGrowth = fin?.revenueGrowth != null ? Number(fin.revenueGrowth) * 100 : null;
-  const profitMargin = fin?.profitMargins != null ? Number(fin.profitMargins) * 100 : null;
-  const currentRatio = fin?.currentRatio ?? null;
-  const marketCap = quote?.marketCap ?? detail?.marketCap ?? null;
+  const pe = fundamentals.pe;
+  const pb = fundamentals.pb;
+  const eps = fundamentals.eps;
+  const divYield = null;
+  const roe = fundamentals.roe;
+  const debtEquity = fundamentals.debtEquity;
+  const revenueGrowth = fundamentals.revenueGrowth;
+  const profitMargin = fundamentals.profitMargin;
+  const currentRatio = fundamentals.currentRatio;
+  const marketCap = null;
 
   const scorecard = buildScorecard(
-    pe != null ? Number(pe) : null,
+    pe,
     roe,
     debtEquity,
     revenueGrowth,
     profitMargin,
-    dayChangePct != null ? Number(dayChangePct) : null,
+    dayChangePct,
     sector,
   );
 
-  const { metrics, fundamentals } = buildMetricsAndFundamentals(
+  const { metrics, fundamentals: fundamentalsGroups } = buildMetricsAndFundamentals(
     sym,
     sector,
-    pe != null ? Number(pe) : null,
-    pb != null ? Number(pb) : null,
-    eps != null ? Number(eps) : null,
+    pe,
+    pb,
+    eps,
     divYield,
     roe,
     debtEquity,
     revenueGrowth,
     profitMargin,
-    currentRatio != null ? Number(currentRatio) : null,
+    currentRatio,
   );
 
   const peers = await fetchPeerMetricsYahoo(sym, ex, sector);
@@ -470,14 +466,14 @@ async function analyzeStockYahoo(
       price: price != null ? Number(price) : null,
       dayChange: dayChange != null ? Number(dayChange) : null,
       dayChangePct: dayChangePct != null ? Math.round(Number(dayChangePct) * 100) / 100 : null,
-      marketCap: marketCap != null ? Number(marketCap) : null,
+      marketCap,
       week52Low: week52Low != null ? Number(week52Low) : null,
       week52High: week52High != null ? Number(week52High) : null,
     },
     scorecard,
     priceHistory: { '1M': hist1M, '6M': hist6M, '1Y': hist1Y },
     metrics,
-    fundamentals,
+    fundamentals: fundamentalsGroups,
     sentiment: {
       score: scorecard.sentiment.value,
       label: scorecard.sentiment.tag,
@@ -499,7 +495,11 @@ export async function analyzeStock(
   const ex = inferExchange(sym, exchange);
 
   if (isFmpProvider()) {
-    return analyzeStockFmp(sym, ex, options);
+    try {
+      return await analyzeStockFmp(sym, ex, options);
+    } catch (err) {
+      console.warn('[stockAnalyzer] FMP failed, falling back to Yahoo:', err);
+    }
   }
   return analyzeStockYahoo(sym, ex, options);
 }
