@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
+import { clearPortfolioUi, hydratePortfolioForUser } from '../stores/portfolioStore';
 
 export interface User {
   id: string;
@@ -21,17 +22,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user?.email) {
         setUser({ id: session.user.id, email: session.user.email });
-      }
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user?.email) {
-        setUser({ id: session.user.id, email: session.user.email });
-      } else {
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          void hydratePortfolioForUser(session.user.id);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        clearPortfolioUi();
         setUser(null);
       }
       setLoading(false);
@@ -67,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
   };
 
   return (

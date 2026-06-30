@@ -18,7 +18,6 @@ export function PortfolioMonitor() {
   const navigate = useNavigate();
 
   const holdings = usePortfolioStore(s => s.holdings);
-  const loadFromBackend = usePortfolioStore(s => s.loadFromBackend);
   const refreshPrices = usePortfolioStore(s => s.refreshPrices);
   const syncError = usePortfolioStore(s => s.syncError);
 
@@ -40,10 +39,6 @@ export function PortfolioMonitor() {
   }, [user]);
 
   useEffect(() => { if (user) loadUsageInfo(); }, [user, loadUsageInfo]);
-
-  useEffect(() => {
-    loadFromBackend().then(() => refreshPrices(true));
-  }, [loadFromBackend, refreshPrices]);
 
   useEffect(() => {
     if (holdings.length === 0) return;

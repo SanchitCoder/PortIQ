@@ -1,15 +1,14 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { AddHoldingInput, Holding, PriceQuote } from '../types/portfolio';
 import {
-  createHolding,
-  deleteHolding,
-  fetchPortfolio,
-  fetchPrices,
-} from '../lib/portfolioApi';
+  createHoldingInSupabase,
+  deleteHoldingFromSupabase,
+  fetchHoldingsFromSupabase,
+} from '../lib/holdingsService';
+import { fetchPrices } from '../lib/portfolioApi';
 import { holdingKey } from '../lib/portfolioMetrics';
 
-/** Retry transient failures (e.g. API still starting on dev:all boot). */
+/** Retry transient failures (e.g. network blips). */
 async function withRetry<T>(fn: () => Promise<T>, attempts = 3, delayMs = 800): Promise<T> {
   let lastErr: unknown;
   for (let i = 0; i < attempts; i++) {
@@ -28,6 +27,7 @@ interface PriceMeta {
 }
 
 interface PortfolioState {
+  userId: string | null;
   holdings: Holding[];
   priceMeta: Record<string, PriceMeta>;
   lastPriceUpdate: string | null;
@@ -35,7 +35,10 @@ interface PortfolioState {
   isRefreshingPrices: boolean;
   syncError: string | null;
 
-  loadFromBackend: () => Promise<void>;
+  /** Switch active user — clears UI only; data stays in Supabase. */
+  setUser: (userId: string | null) => void;
+  /** Load holdings from Supabase for the signed-in user. */
+  loadFromSupabase: () => Promise<void>;
   addHolding: (input: AddHoldingInput) => Promise<{ error?: string }>;
   removeHolding: (id: string) => Promise<void>;
   refreshPrices: (force?: boolean) => Promise<void>;
@@ -53,116 +56,117 @@ function mergePriceIntoHoldings(holdings: Holding[], quotes: PriceQuote[]): Hold
   });
 }
 
-export const usePortfolioStore = create<PortfolioState>()(
-  persist(
-    (set, get) => ({
-      holdings: [],
-      priceMeta: {},
-      lastPriceUpdate: null,
-      isSyncing: false,
-      isRefreshingPrices: false,
-      syncError: null,
+const emptyUiState = {
+  holdings: [] as Holding[],
+  priceMeta: {} as Record<string, PriceMeta>,
+  lastPriceUpdate: null as string | null,
+  syncError: null as string | null,
+};
 
-      loadFromBackend: async () => {
-        set({ isSyncing: true, syncError: null });
-        try {
-          // API: GET /api/portfolio
-          const remote = await withRetry(() => fetchPortfolio());
-          if (remote.length > 0) {
-            set({ holdings: remote });
-          }
-        } catch (err) {
-          console.warn('Portfolio backend sync failed, using local cache:', err);
-          set({ syncError: 'Using cached portfolio — backend unavailable.' });
-        } finally {
-          set({ isSyncing: false });
-        }
-      },
+export const usePortfolioStore = create<PortfolioState>()((set, get) => ({
+  userId: null,
+  holdings: [],
+  priceMeta: {},
+  lastPriceUpdate: null,
+  isSyncing: false,
+  isRefreshingPrices: false,
+  syncError: null,
 
-      addHolding: async (input) => {
-        const symbol = input.symbol.trim().toUpperCase();
-        if (!symbol) return { error: 'Symbol is required.' };
-        if (input.quantity <= 0) return { error: 'Quantity must be greater than 0.' };
-        if (input.avgBuyPrice <= 0) return { error: 'Avg buy price must be greater than 0.' };
+  setUser: (userId) => {
+    if (get().userId === userId) return;
+    set({ userId, ...emptyUiState });
+  },
 
-        const duplicate = get().holdings.find(
-          h => h.symbol === symbol && h.exchange === input.exchange
-        );
-        if (duplicate) return { error: `${symbol} (${input.exchange}) is already in your portfolio.` };
+  loadFromSupabase: async () => {
+    if (!get().userId) return;
 
-        const local: Holding = {
-          id: crypto.randomUUID(),
-          symbol,
-          exchange: input.exchange,
-          quantity: input.quantity,
-          avgBuyPrice: input.avgBuyPrice,
-          buyDate: input.buyDate,
-        };
-
-        set({ holdings: [...get().holdings, local] });
-
-        try {
-          // API: POST /api/portfolio
-          const remote = await createHolding({ ...input, symbol });
-          set({
-            holdings: get().holdings.map(h => (h.id === local.id ? remote : h)),
-          });
-        } catch (err) {
-          console.warn('Backend create failed, keeping local holding:', err);
-        }
-
-        await get().refreshPrices(true);
-        return {};
-      },
-
-      removeHolding: async (id) => {
-        set({ holdings: get().holdings.filter(h => h.id !== id) });
-        try {
-          // API: DELETE /api/portfolio/:id
-          await deleteHolding(id);
-        } catch (err) {
-          console.warn('Backend delete failed, removed locally:', err);
-        }
-      },
-
-      refreshPrices: async (force = false) => {
-        const { holdings } = get();
-        if (holdings.length === 0) return;
-
-        set({ isRefreshingPrices: true });
-        try {
-          // API: POST /api/prices — refresh=true bypasses server cache
-          const quotes = await withRetry(() => fetchPrices(
-            holdings.map(h => ({ symbol: h.symbol, exchange: h.exchange })),
-            { refresh: force },
-          ));
-          get().applyPriceQuotes(quotes);
-          set({ lastPriceUpdate: new Date().toISOString() });
-        } catch (err) {
-          console.warn('Price refresh failed:', err);
-        } finally {
-          set({ isRefreshingPrices: false });
-        }
-      },
-
-      applyPriceQuotes: (quotes) => {
-        const meta: Record<string, PriceMeta> = { ...get().priceMeta };
-        for (const q of quotes) {
-          meta[holdingKey(q.symbol, q.exchange)] = { dayChangePct: q.dayChangePct };
-        }
-        set({
-          holdings: mergePriceIntoHoldings(get().holdings, quotes),
-          priceMeta: meta,
-        });
-      },
-    }),
-    {
-      name: 'portiq-portfolio',
-      partialize: state => ({
-        holdings: state.holdings.map(({ currentPrice, dayChange, dayChangePct, ...h }) => h),
-        priceMeta: {},
-        lastPriceUpdate: null,
-      }),
+    set({ isSyncing: true, syncError: null });
+    try {
+      const remote = await withRetry(() => fetchHoldingsFromSupabase());
+      set({ holdings: remote });
+    } catch (err) {
+      console.warn('Supabase holdings sync failed:', err);
+      set({ syncError: 'Could not load portfolio from Supabase.' });
+    } finally {
+      set({ isSyncing: false });
     }
-  )
-);
+  },
+
+  addHolding: async (input) => {
+    if (!get().userId) return { error: 'Please sign in to save holdings.' };
+
+    const symbol = input.symbol.trim().toUpperCase();
+    if (!symbol) return { error: 'Symbol is required.' };
+    if (input.quantity <= 0) return { error: 'Quantity must be greater than 0.' };
+    if (input.avgBuyPrice <= 0) return { error: 'Avg buy price must be greater than 0.' };
+
+    const duplicate = get().holdings.find(
+      h => h.symbol === symbol && h.exchange === input.exchange,
+    );
+    if (duplicate) return { error: `${symbol} (${input.exchange}) is already in your portfolio.` };
+
+    try {
+      const saved = await createHoldingInSupabase({ ...input, symbol });
+      set({ holdings: [...get().holdings, saved] });
+      await get().refreshPrices(true);
+      return {};
+    } catch (err) {
+      console.warn('Supabase create holding failed:', err);
+      return { error: 'Failed to save holding — please try again.' };
+    }
+  },
+
+  removeHolding: async (id) => {
+    const prev = get().holdings;
+    set({ holdings: prev.filter(h => h.id !== id) });
+    try {
+      await deleteHoldingFromSupabase(id);
+    } catch (err) {
+      console.warn('Supabase delete holding failed:', err);
+      set({ holdings: prev });
+    }
+  },
+
+  refreshPrices: async (force = false) => {
+    const { holdings } = get();
+    if (holdings.length === 0) return;
+
+    set({ isRefreshingPrices: true });
+    try {
+      const quotes = await withRetry(() => fetchPrices(
+        holdings.map(h => ({ symbol: h.symbol, exchange: h.exchange })),
+        { refresh: force },
+      ));
+      get().applyPriceQuotes(quotes);
+      set({ lastPriceUpdate: new Date().toISOString() });
+    } catch (err) {
+      console.warn('Price refresh failed:', err);
+    } finally {
+      set({ isRefreshingPrices: false });
+    }
+  },
+
+  applyPriceQuotes: (quotes) => {
+    const meta: Record<string, PriceMeta> = { ...get().priceMeta };
+    for (const q of quotes) {
+      meta[holdingKey(q.symbol, q.exchange)] = { dayChangePct: q.dayChangePct };
+    }
+    set({
+      holdings: mergePriceIntoHoldings(get().holdings, quotes),
+      priceMeta: meta,
+    });
+  },
+}));
+
+/** After login: load saved holdings from Supabase, then refresh live prices. */
+export async function hydratePortfolioForUser(userId: string): Promise<void> {
+  const store = usePortfolioStore.getState();
+  store.setUser(userId);
+  await store.loadFromSupabase();
+  await store.refreshPrices(true);
+}
+
+/** On logout: clear in-memory UI only (Supabase rows are unchanged). */
+export function clearPortfolioUi(): void {
+  usePortfolioStore.getState().setUser(null);
+}

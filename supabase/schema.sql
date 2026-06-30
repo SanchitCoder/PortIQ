@@ -201,7 +201,7 @@ CREATE TRIGGER update_feature_usage_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_feature_usage_updated_at();
 
 -- =============================================================================
--- 4. PORTFOLIO HOLDINGS (Express API + optional direct Supabase access)
+-- 4. PORTFOLIO HOLDINGS (Supabase — frontend CRUD with RLS; Express API optional legacy)
 -- =============================================================================
 
 CREATE TABLE IF NOT EXISTS public.holdings (

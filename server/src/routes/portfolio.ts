@@ -7,6 +7,7 @@ import {
   listHoldings,
   updateHolding,
 } from '../db/portfolio.js';
+import { requireAuth } from '../lib/auth.js';
 
 const AddSchema = z.object({
   symbol: z.string().min(1),
@@ -20,10 +21,12 @@ const UpdateSchema = AddSchema.partial();
 
 export const portfolioRouter = Router();
 
+portfolioRouter.use(requireAuth);
+
 /** GET /api/portfolio */
-portfolioRouter.get('/', async (_req, res) => {
+portfolioRouter.get('/', async (req, res) => {
   try {
-    res.json(await listHoldings());
+    res.json(await listHoldings(req.userId!));
   } catch (err) {
     console.error('[portfolio] list', err);
     res.status(500).json({ error: 'Failed to load holdings' });
@@ -38,7 +41,7 @@ portfolioRouter.post('/', async (req, res) => {
     return;
   }
   try {
-    const holding = await createHolding(parsed.data);
+    const holding = await createHolding(parsed.data, req.userId!);
     res.status(201).json(holding);
   } catch (err) {
     console.error('[portfolio] create', err);
@@ -54,7 +57,7 @@ portfolioRouter.put('/:id', async (req, res) => {
     return;
   }
   try {
-    const updated = await updateHolding(req.params.id, parsed.data);
+    const updated = await updateHolding(req.params.id, parsed.data, req.userId!);
     if (!updated) {
       res.status(404).json({ error: 'Holding not found' });
       return;
@@ -69,7 +72,7 @@ portfolioRouter.put('/:id', async (req, res) => {
 /** DELETE /api/portfolio/:id */
 portfolioRouter.delete('/:id', async (req, res) => {
   try {
-    const ok = await deleteHoldingRecord(req.params.id);
+    const ok = await deleteHoldingRecord(req.params.id, req.userId!);
     if (!ok) {
       res.status(404).json({ error: 'Holding not found' });
       return;
@@ -84,7 +87,7 @@ portfolioRouter.delete('/:id', async (req, res) => {
 /** GET /api/portfolio/:id */
 portfolioRouter.get('/:id', async (req, res) => {
   try {
-    const holding = await getHolding(req.params.id);
+    const holding = await getHolding(req.params.id, req.userId!);
     if (!holding) {
       res.status(404).json({ error: 'Holding not found' });
       return;

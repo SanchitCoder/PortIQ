@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
 import {
@@ -134,16 +134,10 @@ function buildCorrelationTickers(
 
 export function WhatIfEngine() {
   const holdings = usePortfolioStore(s => s.holdings);
-  const loadFromBackend = usePortfolioStore(s => s.loadFromBackend);
-  const refreshPrices = usePortfolioStore(s => s.refreshPrices);
 
   const [activeId, setActiveId] = useState<ScenarioId>('mkt-crash');
   const [sliders, setSliders] = useState(DEFAULT_SLIDERS);
   const [customRan, setCustomRan] = useState(false);
-
-  useEffect(() => {
-    loadFromBackend().then(() => refreshPrices(true));
-  }, [loadFromBackend, refreshPrices]);
 
   const summary = computePortfolioSummary(holdings);
   const totalValue = summary.currentValue;

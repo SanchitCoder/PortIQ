@@ -7,10 +7,12 @@ import type {
   StressTestResponse,
 } from '../../shared/api-types';
 import { apiUrl } from './apiBase';
+import { getAuthHeaders } from './apiAuth';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const authHeaders = await getAuthHeaders();
   const res = await fetch(apiUrl(path), {
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders, ...init?.headers },
     ...init,
   });
   if (!res.ok) {

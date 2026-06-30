@@ -17,6 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
     "@types/pdfkit": "^0.17.6",
     "bullmq": "^5.34.10",
     "cors": "^2.8.5",
