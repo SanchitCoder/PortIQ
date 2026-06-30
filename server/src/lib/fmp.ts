@@ -12,7 +12,8 @@ export function isFmpProvider(): boolean {
 
 export function toFmpSymbol(symbol: string, exchange: Exchange): string {
   const sym = symbol.trim().toUpperCase();
-  if (exchange === 'NSE' || exchange === 'BSE') return `${sym}.${exchange}`;
+  if (exchange === 'NSE') return `${sym}.NS`;
+  if (exchange === 'BSE') return `${sym}.BO`;
   return sym;
 }
 

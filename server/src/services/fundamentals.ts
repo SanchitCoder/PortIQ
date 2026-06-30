@@ -132,9 +132,18 @@ export async function getFundamentals(
   if (cached) return cached;
 
   try {
-    const result = isFmpProvider()
+    let result = isFmpProvider()
       ? await getFundamentalsFromFmp(sym, ex)
       : await getFundamentalsFromYahoo(sym, ex);
+
+    if (result.unavailable && isFmpProvider()) {
+      try {
+        const yahoo = await getFundamentalsFromYahoo(sym, ex);
+        if (!yahoo.unavailable) result = yahoo;
+      } catch {
+        // keep fmp unavailable fallback
+      }
+    }
 
     await cacheSet(redisKey, result, CACHE_TTL_MS);
     return result;

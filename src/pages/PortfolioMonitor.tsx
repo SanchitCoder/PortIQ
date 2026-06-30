@@ -47,7 +47,7 @@ export function PortfolioMonitor() {
 
   useEffect(() => {
     if (holdings.length === 0) return;
-    const interval = setInterval(() => refreshPrices(false), 30_000);
+    const interval = setInterval(() => refreshPrices(false), 300_000);
     return () => clearInterval(interval);
   }, [holdings.length, refreshPrices]);
 

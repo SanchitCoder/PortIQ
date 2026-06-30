@@ -3,6 +3,7 @@ import type { Exchange, NormalizedQuote, SymbolRequest } from '../../shared/api-
 import {
   fetchFmpQuotes,
   matchFmpQuote,
+  toFmpSymbol,
 } from '../lib/fmp.js';
 import {
   cacheDelete,
@@ -49,8 +50,7 @@ function providerSymbol(symbol: string, exchange: Exchange, provider: string): s
     return sym;
   }
   if (provider === 'fmp') {
-    if (exchange === 'NSE' || exchange === 'BSE') return `${sym}.${exchange}`;
-    return sym;
+    return toFmpSymbol(sym, exchange);
   }
   return sym;
 }
@@ -209,7 +209,7 @@ async function fetchFmp(symbols: SymbolRequest[]): Promise<NormalizedQuote[]> {
   for (const s of symbols) {
     const row = matchFmpQuote(rows, s.symbol, s.exchange);
     if (!row?.price) {
-      console.warn(`[marketData/fmp] no quote for ${s.symbol}.${s.exchange}`);
+      console.warn(`[marketData/fmp] no quote for ${toFmpSymbol(s.symbol, s.exchange)}`);
       continue;
     }
     results.push({
@@ -382,16 +382,24 @@ export async function getQuotes(
       fetched = await provider.getQuotes(toFetch);
     } catch (err) {
       console.warn(`[marketData] ${provider.name} failure:`, err instanceof Error ? err.message : err);
-      if (provider.name !== 'yahoo' && provider.name !== 'fmp') {
-        try {
-          fetched = await fetchYahoo(toFetch);
-        } catch (yahooErr) {
-          console.error('[marketData] Yahoo fallback failure:', yahooErr);
-        }
-      }
     }
 
-    const fetchedKeys = new Set(fetched.map(q => symbolKey(q.symbol, q.exchange)));
+    let fetchedKeys = new Set(fetched.map(q => symbolKey(q.symbol, q.exchange)));
+    const missingAfterPrimary = toFetch.filter(s => !fetchedKeys.has(symbolKey(s.symbol, s.exchange)));
+
+    // FMP/Twelve Data often miss NSE symbols — fill gaps with Yahoo when possible
+    if (missingAfterPrimary.length > 0 && provider.name !== 'yahoo') {
+      try {
+        const yahooFilled = await fetchYahoo(missingAfterPrimary);
+        if (yahooFilled.length > 0) {
+          console.log(`[marketData] Yahoo filled ${yahooFilled.length}/${missingAfterPrimary.length} missing quotes`);
+          fetched = [...fetched, ...yahooFilled];
+          fetchedKeys = new Set(fetched.map(q => symbolKey(q.symbol, q.exchange)));
+        }
+      } catch (yahooErr) {
+        console.warn('[marketData] Yahoo fallback failed:', yahooErr instanceof Error ? yahooErr.message : yahooErr);
+      }
+    }
 
     if (fetched.length > 0) {
       await writeQuoteCache(provider.name, fetched);
